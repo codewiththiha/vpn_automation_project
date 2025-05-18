@@ -32,7 +32,7 @@ public class IPInfoFetcher {
 
 	public static String getIPAddress() throws Exception {
 		JSONObject info = fetchIPInfo();
-		return info.getString("ip");
+		return info.optString("ip", "unknown");
 	}
 
 	public static String getCountry() throws Exception {
