@@ -62,7 +62,7 @@ tasks.named<Test>("test") {
 tasks.register<JavaExec>("runGui") {
     group = "application"
     description = "Runs the JavaFX Gui application"
-    mainClass.set("vpn_automation.Gui")
+    mainClass.set("vpn_automation.Main2")
     classpath = sourceSets.main.get().runtimeClasspath
     jvmArgs = listOf(
         "--module-path", classpath.asPath,

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Text layoutX="110.0" layoutY="193.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name">
+         <font>
+            <Font size="23.0" />
+         </font>
+      </Text>
+      <Text layoutX="110.0" layoutY="247.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Email">
+         <font>
+            <Font size="23.0" />
+         </font>
+      </Text>
+      <Text layoutX="110.0" layoutY="295.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Password">
+         <font>
+            <Font size="23.0" />
+         </font>
+      </Text>
+      <Text layoutX="110.0" layoutY="346.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Confirm">
+         <font>
+            <Font size="23.0" />
+         </font>
+      </Text>
+      <TextField layoutX="247.0" layoutY="171.0" prefHeight="31.0" prefWidth="192.0" promptText="Enter your name" />
+      <TextField layoutX="247.0" layoutY="223.0" prefHeight="31.0" prefWidth="192.0" promptText="Enter your email" />
+      <PasswordField layoutX="247.0" layoutY="273.0" prefHeight="31.0" prefWidth="192.0" promptText="Enter your password" />
+      <PasswordField layoutX="247.0" layoutY="322.0" prefHeight="31.0" prefWidth="192.0" promptText="Renter your password" />
+      <Text layoutX="250.0" layoutY="105.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Register">
+         <font>
+            <Font size="26.0" />
+         </font>
+      </Text>
+   </children>
+</AnchorPane>

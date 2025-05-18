@@ -11,10 +11,10 @@ public class Gui extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// Load the FXML file
-		Parent root = FXMLLoader.load(getClass().getResource("/assets/gui.fxml"));
+		Parent root = FXMLLoader.load(getClass().getResource("/fxml_files/login_or_register.fxml"));
 
 		// Create the scene with the loaded FXML
-		Scene scene = new Scene(root, 400, 300);
+		Scene scene = new Scene(root);
 
 		// Set stage title and scene
 		primaryStage.setTitle("JavaFX GUI Example");

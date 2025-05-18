@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="400.0" prefWidth="600.0"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="vpn_automation.LoginOrRegisterController">
+
+   <children>
+      <Button fx:id="login_button" layoutX="254.0" layoutY="222.0"
+              mnemonicParsing="false" prefHeight="39.0" prefWidth="92.0"
+              style="-fx-background-color: yellow;" text="Login" />
+
+      <Button fx:id="register_button" layoutX="254.0" layoutY="289.0"
+              mnemonicParsing="false" prefHeight="39.0" prefWidth="92.0"
+              style="-fx-background-color: yellow;" text="Register" />
+
+      <Text layoutX="69.0" layoutY="148.0"
+            strokeType="OUTSIDE" strokeWidth="0.0"
+            text="Welcome to Vpn Automator" wrappingWidth="489.1689910888672">
+         <font>
+            <Font size="34.0" />
+         </font>
+      </Text>
+   </children>
+</AnchorPane>
