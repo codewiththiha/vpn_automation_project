@@ -5,26 +5,16 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-            prefHeight="400.0" prefWidth="600.0"
-            xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="vpn_automation.gui.control.LoginOrRegisterController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="571.0" prefWidth="457.0" style="-fx-background-color: #000f22;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vpn_automation.gui.control.LoginOrRegisterController">
 
    <children>
-      <Button fx:id="login_button" layoutX="254.0" layoutY="222.0"
-              mnemonicParsing="false" prefHeight="39.0" prefWidth="92.0"
-              style="-fx-background-color: yellow;" text="Login" />
+      <Button fx:id="login_button" layoutX="183.0" layoutY="247.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="92.0" style="-fx-background-color: #22f5a4;" text="Login" />
 
-      <Button fx:id="register_button" layoutX="254.0" layoutY="289.0"
-              mnemonicParsing="false" prefHeight="39.0" prefWidth="92.0"
-              style="-fx-background-color: yellow;" text="Register" />
+      <Button fx:id="register_button" layoutX="183.0" layoutY="347.0" mnemonicParsing="false" prefHeight="39.0" prefWidth="92.0" style="-fx-background-color: #22f5a4;" text="Register" />
 
-      <Text layoutX="69.0" layoutY="148.0"
-            strokeType="OUTSIDE" strokeWidth="0.0"
-            text="Welcome to Vpn Automator" wrappingWidth="489.1689910888672">
+      <Text fill="#22f5a4" layoutX="57.0" layoutY="135.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Welcome to Vpn Automator" wrappingWidth="343.1689910888672">
          <font>
-            <Font size="34.0" />
+            <Font size="26.0" />
          </font>
       </Text>
    </children>

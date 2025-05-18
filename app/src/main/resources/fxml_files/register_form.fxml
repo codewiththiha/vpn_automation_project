@@ -1,43 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.ColorAdjust?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vpn_automation.gui.control.RegisterController">
-   <children>
-      <Text layoutX="110.0" layoutY="193.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Name">
-         <font>
-            <Font size="23.0" />
-         </font>
-      </Text>
-      <Text layoutX="110.0" layoutY="247.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Email">
-         <font>
-            <Font size="23.0" />
-         </font>
-      </Text>
-      <Text layoutX="110.0" layoutY="295.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Password">
-         <font>
-            <Font size="23.0" />
-         </font>
-      </Text>
-      <Text layoutX="110.0" layoutY="346.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Confirm">
-         <font>
-            <Font size="23.0" />
-         </font>
-      </Text>
-      <TextField layoutX="247.0" layoutY="171.0" prefHeight="31.0" prefWidth="192.0" promptText="Enter your name" />
-      <TextField layoutX="247.0" layoutY="223.0" prefHeight="31.0" prefWidth="192.0" promptText="Enter your email" />
-      <PasswordField layoutX="247.0" layoutY="273.0" prefHeight="31.0" prefWidth="192.0" promptText="Enter your password" />
-      <PasswordField layoutX="247.0" layoutY="322.0" prefHeight="31.0" prefWidth="192.0" promptText="Renter your password" />
-      <Text layoutX="250.0" layoutY="105.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Register">
-         <font>
-            <Font size="26.0" />
-         </font>
-      </Text>
-      <Button fx:id="back_button" layoutX="33.0" layoutY="29.0" mnemonicParsing="false" text="Back" />
-   </children>
-</AnchorPane>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="630.0" prefWidth="492.0" style="-fx-background-color: #000f22;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vpn_automation.gui.control.RegisterController">
+   <center>
+      <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Text fill="#22f5a4" layoutX="178.0" layoutY="104.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Register">
+               <font>
+                  <Font size="35.0" />
+               </font>
+            </Text>
+            <TextField layoutX="84.0" layoutY="265.0" prefHeight="42.0" prefWidth="323.0" promptText="Email" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+               <font>
+                  <Font size="19.0" />
+               </font>
+            </TextField>
+            <PasswordField layoutX="85.0" layoutY="352.0" prefHeight="42.0" prefWidth="322.0" promptText="Password" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+               <font>
+                  <Font size="19.0" />
+               </font>
+            </PasswordField>
+            <Button layoutX="199.0" layoutY="504.0" mnemonicParsing="false" style="-fx-border-radius: 1; -fx-background-color: #22f5a4;" text="Register">
+               <font>
+                  <Font name="System Bold" size="17.0" />
+               </font>
+            </Button>
+            <Button fx:id="back_button" layoutX="33.0" layoutY="38.0" mnemonicParsing="false" style="-fx-background-color: #000f22;">
+               <graphic>
+                  <ImageView fitHeight="28.0" fitWidth="50.0" focusTraversable="true" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../assets/backarrow.png" />
+                     </image>
+                     <effect>
+                        <ColorAdjust brightness="1.0" hue="-0.07" />
+                     </effect>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </ImageView>
+               </graphic>
+            </Button>
+            <Text fill="#8ea491" layoutX="84.0" layoutY="249.0" strokeType="OUTSIDE" strokeWidth="0.0" text="enter your email" />
+            <Text fill="#8ea491" layoutX="84.0" layoutY="335.0" strokeType="OUTSIDE" strokeWidth="0.0" text="enter your password" />
+            <PasswordField layoutX="85.0" layoutY="416.0" prefHeight="42.0" prefWidth="322.0" promptText="Confirm Password" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+               <font>
+                  <Font size="19.0" />
+               </font>
+            </PasswordField>
+            <TextField layoutX="84.0" layoutY="180.0" prefHeight="42.0" prefWidth="157.0" promptText="First Name" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+               <font>
+                  <Font size="19.0" />
+               </font>
+            </TextField>
+            <TextField layoutX="250.0" layoutY="181.0" prefHeight="42.0" prefWidth="157.0" promptText="Last name" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+               <font>
+                  <Font size="19.0" />
+               </font>
+            </TextField>
+            <Text fill="#8ea491" layoutX="84.0" layoutY="167.0" strokeType="OUTSIDE" strokeWidth="0.0" text="enter your name" />
+         </children>
+      </AnchorPane>
+   </center>
+</BorderPane>
