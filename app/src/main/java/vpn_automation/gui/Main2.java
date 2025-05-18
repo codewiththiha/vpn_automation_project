@@ -1,4 +1,4 @@
-package vpn_automation;
+package vpn_automation.gui;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
