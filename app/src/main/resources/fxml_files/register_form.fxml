@@ -21,17 +21,17 @@
                   <Font size="35.0" />
                </font>
             </Text>
-            <TextField layoutX="84.0" layoutY="265.0" prefHeight="42.0" prefWidth="323.0" promptText="Email" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+            <TextField fx:id="email_field" layoutX="84.0" layoutY="265.0" prefHeight="42.0" prefWidth="323.0" promptText="Email" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
                <font>
                   <Font size="19.0" />
                </font>
             </TextField>
-            <PasswordField layoutX="85.0" layoutY="352.0" prefHeight="42.0" prefWidth="322.0" promptText="Password" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+            <PasswordField fx:id="password_field" layoutX="85.0" layoutY="352.0" prefHeight="42.0" prefWidth="322.0" promptText="Password" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
                <font>
                   <Font size="19.0" />
                </font>
             </PasswordField>
-            <Button layoutX="199.0" layoutY="504.0" mnemonicParsing="false" style="-fx-border-radius: 1; -fx-background-color: #22f5a4;" text="Register">
+            <Button fx:id="register_button" layoutX="199.0" layoutY="504.0" mnemonicParsing="false" style="-fx-border-radius: 1; -fx-background-color: #22f5a4;" text="Register">
                <font>
                   <Font name="System Bold" size="17.0" />
                </font>
@@ -53,17 +53,17 @@
             </Button>
             <Text fill="#8ea491" layoutX="84.0" layoutY="249.0" strokeType="OUTSIDE" strokeWidth="0.0" text="enter your email" />
             <Text fill="#8ea491" layoutX="84.0" layoutY="335.0" strokeType="OUTSIDE" strokeWidth="0.0" text="enter your password" />
-            <PasswordField layoutX="85.0" layoutY="416.0" prefHeight="42.0" prefWidth="322.0" promptText="Confirm Password" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+            <PasswordField fx:id="password_confirm_field" layoutX="85.0" layoutY="416.0" prefHeight="42.0" prefWidth="322.0" promptText="Confirm Password" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
                <font>
                   <Font size="19.0" />
                </font>
             </PasswordField>
-            <TextField layoutX="84.0" layoutY="180.0" prefHeight="42.0" prefWidth="157.0" promptText="First Name" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+            <TextField fx:id="first_name_field" layoutX="84.0" layoutY="180.0" prefHeight="42.0" prefWidth="157.0" promptText="First Name" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
                <font>
                   <Font size="19.0" />
                </font>
             </TextField>
-            <TextField layoutX="250.0" layoutY="181.0" prefHeight="42.0" prefWidth="157.0" promptText="Last name" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+            <TextField fx:id="last_name_field" layoutX="250.0" layoutY="181.0" prefHeight="42.0" prefWidth="157.0" promptText="Last name" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
                <font>
                   <Font size="19.0" />
                </font>
