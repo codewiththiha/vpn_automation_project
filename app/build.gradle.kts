@@ -14,7 +14,7 @@ plugins {
 
 javafx {
     version = "21"
-    modules = listOf("javafx.controls", "javafx.fxml")
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.web")
 }
 
 repositories {
@@ -66,7 +66,7 @@ tasks.register<JavaExec>("runGui") {
     classpath = sourceSets.main.get().runtimeClasspath
     jvmArgs = listOf(
         "--module-path", classpath.asPath,
-        "--add-modules", "javafx.controls,javafx.fxml",
+        "--add-modules", "javafx.controls,javafx.fxml,javafx.web", // web for webview
         // "--enable-native-access", "javafx.graphics",
         "-Djdk.suppressUnsafeWarnings=true" // Suppress sun.misc.Unsafe warnings
     )

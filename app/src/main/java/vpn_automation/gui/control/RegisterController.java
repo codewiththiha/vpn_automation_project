@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import vpn_automation.backend.Policies;
 import vpn_automation.gui.NavigationUtils;
 
 public class RegisterController {
@@ -37,6 +38,7 @@ public class RegisterController {
 
 	@FXML
 	private void handleRegister() {
+		ErrorDialog dialog = new ErrorDialog();
 		String firstName = first_name_field.getText();
 		String lastName = last_name_field.getText();
 		String email = email_field.getText();
@@ -48,11 +50,35 @@ public class RegisterController {
 		System.out.println(email);
 		System.out.println(password);
 		System.out.println(confirmPassword);
-		if (!password.equals(confirmPassword)) {
-			ErrorDialog dialog = new ErrorDialog();
+
+		// Check the credentials are okay or not
+		if (!Policies.isValidEmail(email)) {
+			dialog.setErrorMessage("Invalid Email format");
+			dialog.show();
+		} else if (password.isEmpty()) {
+			dialog.setErrorMessage("Password fill the password field.");
+			dialog.show();
+		} else if (!Policies.hasUpperCase(password)) {
+			dialog.setErrorMessage("Password must have at least\n one capital letter!");
+			dialog.show();
+		} else if (!Policies.hasLowerCase(password)) {
+			dialog.setErrorMessage("Password must have at least\n one lower case letter!");
+			dialog.show();
+		} else if (!Policies.hasMinLength(password)) {
+			dialog.setErrorMessage("Your password is too short!");
+			dialog.show();
+		} else if (!password.equals(confirmPassword)) {
 			dialog.setErrorMessage("Password didn't match!");
 			dialog.show();
+		} else {
+			dialog.setErrorMessage("Succeed!");
+			dialog.show();
 		}
+		// if (!password.equals(confirmPassword)) {
+		// ErrorDialog dialog = new ErrorDialog();
+		// dialog.setErrorMessage("Password didn't match!");
+		// dialog.show();
+		// }
 
 	}
 
