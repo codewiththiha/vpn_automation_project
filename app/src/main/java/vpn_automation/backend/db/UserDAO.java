@@ -39,7 +39,8 @@ public class UserDAO {
 				// Return the first active user ID found
 				return rs.getInt("user_id");
 			} else {
-				// No active user found
+				// No active user found for case -1 - i need to check whether sql int support
+				// negative values!
 				return -1;
 			}
 		} catch (SQLException e) {

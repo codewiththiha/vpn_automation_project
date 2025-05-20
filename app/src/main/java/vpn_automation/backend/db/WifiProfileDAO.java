@@ -2,9 +2,12 @@ package vpn_automation.backend.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class VPNProfileDAO {
+public class WifiProfileDAO {
 	public static void makeWifiProfileForLoggedInUser(int userID, String wifiBrand, String currentIpAddress,
 			String originalCountry, String wifiName)
 			throws SQLException {
@@ -27,5 +30,29 @@ public class VPNProfileDAO {
 			System.err.println("Error making wifi profile!");
 			e.printStackTrace();
 		}
+	}
+
+	public static List<Integer> getWifiProfileIds(int userId) {
+		List<Integer> profileIds = new ArrayList<>();
+
+		String query = "SELECT wifi_profile_id FROM WifiProfile WHERE user_id = ?";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, userId);
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				int profileId = rs.getInt("wifi_profile_id");
+				profileIds.add(profileId);
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving wifi_profile_ids:");
+			e.printStackTrace();
+		}
+
+		return profileIds;
 	}
 }

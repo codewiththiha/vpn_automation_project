@@ -2,7 +2,10 @@ package vpn_automation.backend.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VPNConfigDAO {
 
@@ -27,5 +30,27 @@ public class VPNConfigDAO {
 			System.err.println("Error inserting OVPN file paths:");
 			e.printStackTrace();
 		}
+	}
+
+	public static List<Integer> checkCorrespondingConfigForWifiProfile(int wifiProfileID) {
+		List<Integer> vpnConfigIds = new ArrayList<>();
+		String query = "SELECT config_id FROM VPNConfig WHERE wifi_profile_id = ?";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, wifiProfileID);
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				int vpnConfigId = rs.getInt("config_id");
+				vpnConfigIds.add(vpnConfigId);
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving config_ids:");
+			e.printStackTrace();
+		}
+
+		return vpnConfigIds;
 	}
 }

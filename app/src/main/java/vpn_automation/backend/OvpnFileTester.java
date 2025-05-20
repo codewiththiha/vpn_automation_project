@@ -71,7 +71,6 @@ public class OvpnFileTester {
 			// ProcessBuilder pb = new ProcessBuilder("sudo", "openvpn", file.toString());
 			// // originally it was only 'openvpnc'
 			ProcessBuilder pb = new ProcessBuilder(
-					"sudo",
 					"openvpn",
 					"--dev", "tun",
 					"--config", file.toString());
