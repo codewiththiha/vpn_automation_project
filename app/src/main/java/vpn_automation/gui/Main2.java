@@ -11,7 +11,7 @@ public class Main2 extends Application {
 
 	@Override
 	public void start(Stage stage) throws IOException {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_files/progressing_startup.fxml"));
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_files/register_form.fxml"));
 		Scene scene = new Scene(loader.load());
 		stage.setTitle("Vpn Automator");
 		stage.setScene(scene);

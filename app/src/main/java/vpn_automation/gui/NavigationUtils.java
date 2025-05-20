@@ -27,4 +27,15 @@ public class NavigationUtils {
 			e.printStackTrace();
 		}
 	}
+
+	public static void navigateTo(Stage stage, String fxmlFile) {
+		try {
+			Parent root = FXMLLoader.load(NavigationUtils.class.getResource(fxmlFile));
+			stage.setScene(new Scene(root));
+			stage.show();
+		} catch (IOException e) {
+			System.err.println("Error loading FXML file: " + fxmlFile);
+			e.printStackTrace();
+		}
+	}
 }

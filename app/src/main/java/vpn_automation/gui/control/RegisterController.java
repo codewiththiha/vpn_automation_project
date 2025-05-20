@@ -1,10 +1,14 @@
 package vpn_automation.gui.control;
 
+import java.sql.SQLException;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import vpn_automation.backend.Policies;
+import vpn_automation.backend.db.UserDAO;
 import vpn_automation.gui.NavigationUtils;
 
 public class RegisterController {
@@ -33,11 +37,18 @@ public class RegisterController {
 	@FXML
 	private void initialize() {
 		back_button.setOnAction(event -> NavigationUtils.navigateTo(event, "/fxml_files/login_or_register.fxml"));
-		register_button.setOnAction(event -> handleRegister());
+		register_button.setOnAction(event -> {
+			try {
+				handleRegister();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
 	}
 
 	@FXML
-	private void handleRegister() {
+	private void handleRegister() throws SQLException {
 		ErrorDialog dialog = new ErrorDialog();
 		String firstName = first_name_field.getText();
 		String lastName = last_name_field.getText();
@@ -73,6 +84,11 @@ public class RegisterController {
 		} else {
 			dialog.setErrorMessage("Succeed!");
 			dialog.show();
+			UserDAO.registerUser(fullName, confirmPassword, email);
+
+			// Navigate to the startup page
+			Stage currentStage = (Stage) register_button.getScene().getWindow();
+			NavigationUtils.navigateTo(currentStage, "/fxml_files/startup_page.fxml");
 		}
 		// if (!password.equals(confirmPassword)) {
 		// ErrorDialog dialog = new ErrorDialog();
