@@ -9,67 +9,65 @@ import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import vpn_automation.backend.db.VPNConfigDAO;
 
 public class OvpnFileTester {
 	private final static int TIMEOUT_SECONDS = 20;
 
-	public List<String> testOvpnFiles(String directory) throws SQLException, Exception {
-		System.out.println("Starting OVPN file testing...");
-		System.out.println("Scanning directory: " + directory);
+	public List<String> testOvpnFiles(String directory, Consumer<String> guiUpdater) throws SQLException, Exception {
+		guiUpdater.accept("Starting OVPN file testing...");
+		guiUpdater.accept("Scanning directory: " + directory);
 
 		List<String> workingFiles = new ArrayList<>();
 
 		try {
 			List<Path> ovpnFiles = FileUtils.getOvpnFiles(directory);
 			if (ovpnFiles.isEmpty()) {
-				System.out.println("No .ovpn files found in the current directory");
+				guiUpdater.accept("No .ovpn files found in the current directory");
 				return workingFiles;
 			}
 
 			for (Path file : ovpnFiles) {
 				try {
 					if (FileUtils.isChecked(file)) {
-						System.out.println("Skipping already checked file: " + file.getFileName());
+						guiUpdater.accept("Skipping already checked file: " + file.getFileName());
 						continue;
 					}
 
-					if (testOvpnFile(file)) {
-						workingFiles.add(file.toString()); // will return with the absolute path don't know how to
-															// return relative tho. getFileName() for file name only
-						// VPNConfigDAO.insertOvpnFilePaths(file.toString(), 1,
-						// IPInfoFetcher.getIPAddress(),
-						// IPInfoFetcher.getCountry());
+					guiUpdater.accept("Testing: " + file.getFileName());
+
+					if (testOvpnFile(file, guiUpdater)) {
+						workingFiles.add(file.toString());
+						guiUpdater.accept("✅ Success: " + file.getFileName() + " connected successfully");
+					} else {
+						guiUpdater.accept("❌ Failed: " + file.getFileName());
 					}
-					// markAsChecked(file);
 				} catch (IOException e) {
-					System.out.println("Error processing " + file.getFileName() + ": " + e.getMessage());
+					guiUpdater.accept("⚠ Error processing " + file.getFileName() + ": " + e.getMessage());
 				}
 				System.out.println("--------------------------------------------------");
 			}
 
 			if (!workingFiles.isEmpty()) {
-				saveWorkingFiles(workingFiles);
-				System.out.println("Found " + workingFiles.size() + " working OVPN files");
+				saveWorkingFiles(workingFiles, guiUpdater);
+				guiUpdater.accept("Found " + workingFiles.size() + " working OVPN files");
 			} else {
-				System.out.println("No working OVPN files found");
+				guiUpdater.accept("No working OVPN files found");
 			}
 		} catch (IOException e) {
-			System.out.println("Error scanning directory: " + e.getMessage());
+			guiUpdater.accept("⚠ Error scanning directory: " + e.getMessage());
 		}
 
-		System.out.println("Testing complete");
+		guiUpdater.accept("Testing complete");
 		return workingFiles;
 	}
 
-	private boolean testOvpnFile(Path file) throws SQLException, Exception {
-		System.out.println("Testing: " + file.getFileName());
+	private boolean testOvpnFile(Path file, Consumer<String> guiUpdater) throws SQLException, Exception {
 		Process process = null;
 
 		try {
-			// ProcessBuilder pb = new ProcessBuilder("sudo", "openvpn", file.toString());
-			// // originally it was only 'openvpnc'
 			ProcessBuilder pb = new ProcessBuilder(
 					"openvpn",
 					"--dev", "tun",
@@ -86,33 +84,27 @@ public class OvpnFileTester {
 				if (reader.ready()) {
 					line = reader.readLine();
 					if (line != null) {
-						System.out.println(line);
+						guiUpdater.accept(line);
 						if (line.contains("Initialization Sequence Completed")) {
-							// Successfully connected
 							VPNConfigDAO.insertOvpnFilePaths(file.toString(), 1,
 									IPInfoFetcher.getIPAddress(),
 									IPInfoFetcher.getCountry());
-							System.out.println(file.getFileName() + " connected successfully");
-
-							// Optionally terminate the connection after success detection
-							// Or let it run in background
 							return true;
 						}
 					}
 				}
 
-				// If we haven't returned yet, check if we should time out
 				if (System.currentTimeMillis() - startTime >= TIMEOUT_SECONDS * 1000) {
-					System.out
-							.println(file.getFileName() + " failed to connect within " + TIMEOUT_SECONDS + " seconds");
+					guiUpdater.accept(
+							"⏰ Timeout: " + file.getFileName() + " failed within " + TIMEOUT_SECONDS + " seconds");
 					return false;
 				}
 
-				Thread.sleep(100); // Sleep 100ms
+				Thread.sleep(100);
 			}
 
 		} catch (IOException | InterruptedException e) {
-			System.out.println("Error testing " + file.getFileName() + ": " + e.getMessage());
+			guiUpdater.accept("⚠ Error testing " + file.getFileName() + ": " + e.getMessage());
 			return false;
 		} finally {
 			if (process != null && process.isAlive()) {
@@ -126,26 +118,16 @@ public class OvpnFileTester {
 		}
 	}
 
-	// private void markAsChecked(Path file) {
-	// try {
-	// FileUtils.appendToFile(file, "# checked");
-	// System.out.println("Marked as checked: " + file.getFileName());
-	// } catch (IOException e) {
-	// System.out.println("Error marking " + file.getFileName() + " as checked: " +
-	// e.getMessage());
-	// }
-	// }
-
-	private void saveWorkingFiles(List<String> workingFiles) {
+	private void saveWorkingFiles(List<String> workingFiles, Consumer<String> guiUpdater) {
 		try {
 			List<String> lines = new ArrayList<>();
 			lines.add("Working VPN Configuration Files:");
 			lines.add("----------------------------------------");
 			lines.addAll(workingFiles);
 			Files.write(Paths.get("working_vpn_files.txt"), lines);
-			System.out.println("Results saved to working_vpn_files.txt");
+			guiUpdater.accept("💾 Results saved to working_vpn_files.txt");
 		} catch (IOException e) {
-			System.out.println("Error saving results: " + e.getMessage());
+			guiUpdater.accept("⚠ Error saving results: " + e.getMessage());
 		}
 	}
 }

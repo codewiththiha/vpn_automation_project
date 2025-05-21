@@ -1,7 +1,6 @@
 package vpn_automation.gui.control;
 
 import java.sql.SQLException;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.concurrent.Task;
@@ -25,50 +24,48 @@ public class StartupOnlyProgressingGui {
 	@FXML
 	private ProgressBar progress_bar;
 
+	private Task<Void> backgroundTask;
+	private Thread backgroundThread;
+
 	public void initialize() throws SQLException, Exception {
 		if (web_view_component != null) {
 			WebEngine engine = web_view_component.getEngine();
-			String gifPath = getClass()
-					.getResource("/assets/dancing_panda.gif")
-					.toExternalForm();
+			String gifPath = getClass().getResource("/assets/dancing_panda.gif").toExternalForm();
 			engine.load(gifPath);
 		}
 
 		animateProgressBarTo100InSeconds(20);
-		// main();
-		// making appear only after that main
-		// Start background task
-		Task<Void> backgroundTask = new Task<>() {
+
+		// Create background task
+		backgroundTask = new Task<>() {
 			@Override
 			protected Void call() throws Exception {
-				// Simulate or run actual work here
 				String currentDir = "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
 				OvpnFileModifier modifier = new OvpnFileModifier();
 				OvpnFileTester tester = new OvpnFileTester();
 
-				modifier.modifyOvpnFiles(currentDir);
-				tester.testOvpnFiles(currentDir);
+				modifier.modifyOvpnFiles(currentDir, StartupOnlyProgressingGui.this::updateGuiMessage);
+				tester.testOvpnFiles(currentDir, StartupOnlyProgressingGui.this::updateGuiMessage);
 
 				return null;
 			}
 		};
 
-		// Optional: Update progress label on UI thread
-		backgroundTask.setOnRunning(e -> {
-			setMessage("Processing OVPN files...");
+		// backgroundTask.setOnRunning(e -> updateGuiMessage("Processing OVPN
+		// files..."));
+		// backgroundTask.setOnSucceeded(e -> updateGuiMessage("Done! Ready to use."));
+		backgroundTask.setOnFailed(e -> {
+			updateGuiMessage("⚠ Error occurred during processing.");
+			backgroundTask.getException().printStackTrace();
 		});
 
-		backgroundTask.setOnSucceeded(e -> {
-			setMessage("Done! Ready to use.");
-		});
+		backgroundThread = new Thread(backgroundTask);
+		backgroundThread.setDaemon(true);
+		backgroundThread.start();
+	}
 
-		// Run the background task in a separate thread
-		new Thread(backgroundTask).start();
-		// TODO must fix
-		// this have issue too it not stop walking eventhough i close the gui
-		// i can't set message for the gui (need to change sysprints with gui but not
-		// flexible)
-		// the tested ones are fixed to id1 must fix that too
+	public void updateGuiMessage(String message) {
+		javafx.application.Platform.runLater(() -> adjustable_text.setText(message));
 	}
 
 	int current = 0;
@@ -80,10 +77,8 @@ public class StartupOnlyProgressingGui {
 		Timeline timeline = new Timeline(new KeyFrame(Duration.millis(1000 / 60), e -> {
 			if (currentProgress[0] < 1.0) {
 				currentProgress[0] += 1.0 / totalFrames;
-
-				current += 1; // current will 1200 since 1 frame = 60 per second and you run 20 second so 1200
+				current += 1;
 				progress_bar.setProgress(currentProgress[0]);
-				// adjustable_text.setText("Loading... " + (int) (current / 12) + "%");
 			}
 		}));
 
@@ -91,16 +86,12 @@ public class StartupOnlyProgressingGui {
 		timeline.play();
 	}
 
-	public void setMessage(String message) {
-		adjustable_text.setText(message);
-	}
-
 	public void main() throws SQLException, Exception {
 		String currentDir = "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
 		OvpnFileModifier modifier = new OvpnFileModifier();
 		OvpnFileTester tester = new OvpnFileTester();
 
-		modifier.modifyOvpnFiles(currentDir);
-		tester.testOvpnFiles(currentDir);
+		modifier.modifyOvpnFiles(currentDir, this::updateGuiMessage);
+		tester.testOvpnFiles(currentDir, this::updateGuiMessage);
 	}
 }

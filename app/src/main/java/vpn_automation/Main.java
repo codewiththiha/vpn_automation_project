@@ -13,7 +13,7 @@ public class Main {
 		OvpnFileModifier modifier = new OvpnFileModifier();
 		OvpnFileTester tester = new OvpnFileTester();
 
-		modifier.modifyOvpnFiles(currentDir);
-		tester.testOvpnFiles(currentDir);
+		// modifier.modifyOvpnFiles(currentDir);
+		// tester.testOvpnFiles(currentDir);
 	}
 }
