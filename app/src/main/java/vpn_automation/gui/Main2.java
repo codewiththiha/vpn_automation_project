@@ -19,14 +19,22 @@ public class Main2 extends Application {
 		int activeUserId = UserDAO.getActiveUserId();
 		FXMLLoader loader = null;
 		// first check if it logged in?
+		// you need to refector here
 		if (activeUserId != -1) {
 			List<Integer> wifiProfileIds = WifiProfileDAO.getWifiProfileIds(activeUserId);
+			// int wifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
 			if (wifiProfileIds.size() > 0) {
-				int wifiProfileId = wifiProfileIds.getFirst(); // need to refactor cuz it look dumb
-				if (VPNConfigDAO.checkCorrespondingConfigForWifiProfile(wifiProfileId).isEmpty()) {
+				// need to refactor cuz it look dumb
+				int wifiProfileId = wifiProfileIds.getFirst();
+				// if vpnconfig is found for you there will be no startup progressing page for
+				// you
+				if (VPNConfigDAO.giveWifiProfileIdGetvpnConfigIds(wifiProfileId).isEmpty()) {
 					// should add a new gui that warn user since no vpn config is found will start
 					// searching now
 					loader = new FXMLLoader(getClass().getResource("/fxml_files/progressing_startup.fxml"));
+				} else if (!VPNConfigDAO.giveWifiProfileIdGetvpnConfigIds(wifiProfileId).isEmpty()) {
+					System.out.println("Main Gui");
+					loader = new FXMLLoader(getClass().getResource("/fxml_files/startup_page.fxml"));
 				}
 			} else if (wifiProfileIds.isEmpty()) { // if wifiprofile id not found that mean you missed this part
 				loader = new FXMLLoader(getClass().getResource("/fxml_files/startup_page.fxml"));
@@ -38,7 +46,7 @@ public class Main2 extends Application {
 			System.out.println("Unknown");
 		}
 		if (loader == null) {
-			// Fallback in case of unexpected state
+			System.out.println("Here");
 			throw new IllegalStateException("Failed to load FXML: loader is null");
 		}
 		Scene scene = new Scene(loader.load());

@@ -55,4 +55,24 @@ public class WifiProfileDAO {
 
 		return profileIds;
 	}
+
+	public static int getActiveWifiProfileId() {
+		String query = "SELECT wifi_profile_id FROM WifiProfile WHERE active_profile =1;";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query);
+				ResultSet rs = pstmt.executeQuery()) {
+
+			if (rs.next()) {
+				// Return the first active wifiProfileID found
+				return rs.getInt("wifi_profile_id");
+			} else {
+				return -1;
+			}
+		} catch (SQLException e) {
+			System.err.println("Error retrieving wifiProfileID:");
+			e.printStackTrace();
+			return -1;
+		}
+	}
 }

@@ -54,7 +54,7 @@ public class StartupOnlyGui {
 			List<Integer> wifiProfileIds = WifiProfileDAO.getWifiProfileIds(userID);
 			if (wifiProfileIds.size() == 1) {
 				int wifiProfileId = wifiProfileIds.getFirst(); // need to refactor cuz it look dumb
-				if (VPNConfigDAO.checkCorrespondingConfigForWifiProfile(wifiProfileId).isEmpty()) {
+				if (VPNConfigDAO.giveWifiProfileIdGetvpnConfigIds(wifiProfileId).isEmpty()) {
 					// Navigate to the startup page
 					Stage currentStage = (Stage) submit_button.getScene().getWindow();
 					NavigationUtils.navigateTo(currentStage, "/fxml_files/progressing_startup.fxml");

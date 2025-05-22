@@ -11,7 +11,7 @@ public class Gui extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// Load the FXML file
-		Parent root = FXMLLoader.load(getClass().getResource("/fxml_files/login_or_register.fxml"));
+		Parent root = FXMLLoader.load(getClass().getResource("/fxml_files/progressing_startup.fxml"));
 
 		// Create the scene with the loaded FXML
 		Scene scene = new Scene(root);

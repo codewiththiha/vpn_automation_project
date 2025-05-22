@@ -5,6 +5,9 @@ import java.nio.file.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import vpn_automation.backend.db.VPNConfigDAO;
+import vpn_automation.backend.db.WifiProfileDAO;
+
 public class FileUtils {
 
 	public static List<Path> getOvpnFiles(String directory) throws IOException {
@@ -25,14 +28,13 @@ public class FileUtils {
 		Files.write(path, (content + "\n").getBytes(), StandardOpenOption.APPEND);
 	}
 
-	public static boolean isChecked(Path path) throws IOException {
-		List<String> lines = readLines(path);
-
-		for (int i = lines.size() - 1; i >= 0; i--) {
-			String line = lines.get(i).trim();
-			if (!line.isEmpty()) {
-				return line.equals("# checked");
-			}
+	// new mechanism needed here
+	public static boolean isChecked(String pathString) throws IOException {
+		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
+		List<String> CheckedOvpnPaths = VPNConfigDAO.giveWifiProfileIdCheckedGetOvpnFilesPaths(activeWifiProfileId);
+		if (CheckedOvpnPaths.contains(pathString)) {
+			System.out.println("Checked Skipped");
+			return true;
 		}
 
 		return false;

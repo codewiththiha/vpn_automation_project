@@ -10,8 +10,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.time.LocalDateTime;
 
 import vpn_automation.backend.db.VPNConfigDAO;
+import vpn_automation.backend.db.WifiProfileDAO;
 
 public class OvpnFileTester {
 	private final static int TIMEOUT_SECONDS = 20;
@@ -28,24 +30,25 @@ public class OvpnFileTester {
 				guiUpdater.accept("No .ovpn files found in the current directory");
 				return workingFiles;
 			}
-
+			// you can specify here for the user limit option
 			for (Path file : ovpnFiles) {
 				try {
-					if (FileUtils.isChecked(file)) {
+					if (FileUtils.isChecked(file.toString())) {
 						guiUpdater.accept("Skipping already checked file: " + file.getFileName());
 						continue;
 					}
 
-					guiUpdater.accept("Testing: " + file.getFileName());
+					guiUpdater.accept(
+							"Testing: " + file.getFileName() + "\n" + workingFiles.size() + " vpn configs found.");
 
 					if (testOvpnFile(file, guiUpdater)) {
 						workingFiles.add(file.toString());
-						guiUpdater.accept("✅ Success: " + file.getFileName() + " connected successfully");
+						guiUpdater.accept("Success: " + file.getFileName() + " connected successfully");
 					} else {
-						guiUpdater.accept("❌ Failed: " + file.getFileName());
+						guiUpdater.accept("Failed: " + file.getFileName());
 					}
 				} catch (IOException e) {
-					guiUpdater.accept("⚠ Error processing " + file.getFileName() + ": " + e.getMessage());
+					guiUpdater.accept("Error processing " + file.getFileName() + ": " + e.getMessage());
 				}
 				System.out.println("--------------------------------------------------");
 			}
@@ -57,7 +60,7 @@ public class OvpnFileTester {
 				guiUpdater.accept("No working OVPN files found");
 			}
 		} catch (IOException e) {
-			guiUpdater.accept("⚠ Error scanning directory: " + e.getMessage());
+			guiUpdater.accept("Error scanning directory: " + e.getMessage());
 		}
 
 		guiUpdater.accept("Testing complete");
@@ -66,12 +69,12 @@ public class OvpnFileTester {
 
 	private boolean testOvpnFile(Path file, Consumer<String> guiUpdater) throws SQLException, Exception {
 		Process process = null;
-
+		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
+		LocalDateTime now = LocalDateTime.now();
 		try {
 			ProcessBuilder pb = new ProcessBuilder(
 					"openvpn",
-					"--dev", "tun",
-					"--config", file.toString());
+					file.toString());
 
 			pb.redirectErrorStream(true); // Merge stdout and stderr
 			process = pb.start();
@@ -84,11 +87,13 @@ public class OvpnFileTester {
 				if (reader.ready()) {
 					line = reader.readLine();
 					if (line != null) {
-						guiUpdater.accept(line);
+						// way too much for a normal user
+						// guiUpdater.accept(line);
+						System.out.println(line);
 						if (line.contains("Initialization Sequence Completed")) {
-							VPNConfigDAO.insertOvpnFilePaths(file.toString(), 1,
+							VPNConfigDAO.insertOvpnFilePaths(file.toString(), activeWifiProfileId,
 									IPInfoFetcher.getIPAddress(),
-									IPInfoFetcher.getCountry());
+									IPInfoFetcher.getCountry(), now);
 							return true;
 						}
 					}
@@ -96,7 +101,7 @@ public class OvpnFileTester {
 
 				if (System.currentTimeMillis() - startTime >= TIMEOUT_SECONDS * 1000) {
 					guiUpdater.accept(
-							"⏰ Timeout: " + file.getFileName() + " failed within " + TIMEOUT_SECONDS + " seconds");
+							"Timeout: " + file.getFileName() + " failed within " + TIMEOUT_SECONDS + " seconds");
 					return false;
 				}
 
@@ -104,7 +109,7 @@ public class OvpnFileTester {
 			}
 
 		} catch (IOException | InterruptedException e) {
-			guiUpdater.accept("⚠ Error testing " + file.getFileName() + ": " + e.getMessage());
+			guiUpdater.accept("Error testing " + file.getFileName() + ": " + e.getMessage());
 			return false;
 		} finally {
 			if (process != null && process.isAlive()) {
@@ -125,9 +130,9 @@ public class OvpnFileTester {
 			lines.add("----------------------------------------");
 			lines.addAll(workingFiles);
 			Files.write(Paths.get("working_vpn_files.txt"), lines);
-			guiUpdater.accept("💾 Results saved to working_vpn_files.txt");
+			guiUpdater.accept("Results saved to working_vpn_files.txt");
 		} catch (IOException e) {
-			guiUpdater.accept("⚠ Error saving results: " + e.getMessage());
+			guiUpdater.accept("Error saving results: " + e.getMessage());
 		}
 	}
 }

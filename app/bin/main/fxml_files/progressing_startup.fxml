@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.web.WebView?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="571.0" prefWidth="457.0" style="-fx-background-color: #000f22;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vpn_automation.gui.control.StartupOnlyProgressingGui">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="571.0" prefWidth="457.0" style="-fx-background-color: #000f22;" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vpn_automation.gui.control.StartupOnlyProgressingGui">
 
    <children>
       <ProgressBar fx:id="progress_bar" layoutX="96.0" layoutY="408.0" prefHeight="20.0" prefWidth="265.0" progress="0.42">
@@ -14,7 +14,7 @@
             <ColorAdjust brightness="-0.02" contrast="-0.05" hue="-0.33" saturation="-0.17" />
          </effect>
       </ProgressBar>
-      <Label fx:id="adjustable_text" layoutX="194.0" layoutY="471.0" text="Please wait" textFill="#22f5a4" />
+      <Label fx:id="adjustable_text" layoutX="194.0" layoutY="471.0" text="Please wait" textAlignment="CENTER" textFill="#22f5a4" />
       <WebView fx:id="web_view_component" layoutX="129.0" layoutY="119.0" prefHeight="200.0" prefWidth="200.0" style="-fx-page-fill: TRANSPARENT;" />
    </children>
 </AnchorPane>
