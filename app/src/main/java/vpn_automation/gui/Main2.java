@@ -32,9 +32,11 @@ public class Main2 extends Application {
 					// should add a new gui that warn user since no vpn config is found will start
 					// searching now
 					loader = new FXMLLoader(getClass().getResource("/fxml_files/progressing_startup.fxml"));
-				} else if (!VPNConfigDAO.giveWifiProfileIdGetvpnConfigIds(wifiProfileId).isEmpty()) {
+				}
+				// if config isn't empty that mean used before and need main gui
+				else if (!VPNConfigDAO.giveWifiProfileIdGetvpnConfigIds(wifiProfileId).isEmpty()) {
 					System.out.println("Main Gui");
-					loader = new FXMLLoader(getClass().getResource("/fxml_files/startup_page.fxml"));
+					loader = new FXMLLoader(getClass().getResource("/fxml_files/mainGui.fxml"));
 				}
 			} else if (wifiProfileIds.isEmpty()) { // if wifiprofile id not found that mean you missed this part
 				loader = new FXMLLoader(getClass().getResource("/fxml_files/startup_page.fxml"));

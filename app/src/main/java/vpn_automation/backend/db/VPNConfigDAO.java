@@ -6,6 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import vpn_automation.backend.CountryCodeConverter;
+
 import java.time.LocalDateTime;
 
 public class VPNConfigDAO {
@@ -59,7 +62,7 @@ public class VPNConfigDAO {
 
 	public static List<String> giveWifiProfileIdCheckedGetOvpnFilesPaths(int wifiProfileID) {
 		List<String> ovpnFilePaths = new ArrayList<>();
-		String query = "SELECT ovpn_file_path FROM vpn_automation_project.VPNConfig WHERE wifi_profile_id = ?  AND last_checked > NOW() - INTERVAL 3 DAY";
+		String query = "SELECT ovpn_file_path FROM VPNConfig WHERE wifi_profile_id = ?  AND last_checked > NOW() - INTERVAL 3 DAY";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
 
@@ -78,4 +81,101 @@ public class VPNConfigDAO {
 
 		return ovpnFilePaths;
 	}
+
+	public static List<String> getCountries(int wifiProfileID) {
+		List<String> countries = new ArrayList<>();
+		String query = "SELECT country FROM VPNConfig WHERE wifi_profile_id = ?";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, wifiProfileID);
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				String country = rs.getString("country");
+				countries.add(country);
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving config_ids:");
+			e.printStackTrace();
+		}
+
+		return countries;
+	}
+
+	public static void refreshAndGenerateEncodedCountries(int wifiProfileId) {
+		List<String> countryCodes = getCountries(wifiProfileId);
+		CountryCodeConverter.resetCounter();
+		replaceWithNULLToEncoded(wifiProfileId);
+
+		for (String countryCode : countryCodes) {
+			String Encodedcountry = CountryCodeConverter.counter(countryCode);
+			setEncodedCountries(Encodedcountry, countryCode.toUpperCase(), wifiProfileId);
+		}
+	}
+
+	public static void replaceWithNULLToEncoded(int wifiProfileId) {
+		String query = "UPDATE VPNConfig SET encoded_names = NULL where wifi_profile_id = ?";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+			pstmt.setInt(1, wifiProfileId);
+			int rowsUpdated = pstmt.executeUpdate();
+			if (rowsUpdated > 0) {
+				System.out.println("NULL replaced");
+			} else {
+				System.out.println("Null replace process failed!");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void setEncodedCountries(String encodedName, String countryCode, int wifiProfileId) {
+		String query = "UPDATE VPNConfig SET encoded_names = ? WHERE country = ? AND wifi_profile_id = ? AND encoded_names IS NULL LIMIT 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setString(1, encodedName);
+			pstmt.setString(2, countryCode);
+			pstmt.setInt(3, wifiProfileId);
+
+			// Execute the update
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Successfully updated a row with encoded name: " + encodedName);
+			} else {
+				System.out.println("No matching row found for country: " + countryCode +
+						", wifi_profile_id: " + wifiProfileId);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static List<String> getEncodedCountries(int wifiProfileID) {
+		List<String> countries = new ArrayList<>();
+		String query = "SELECT encoded_names FROM VPNConfig WHERE wifi_profile_id = ?";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, wifiProfileID);
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				String country = rs.getString("encoded_names");
+				countries.add(country);
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving encoded_names");
+			e.printStackTrace();
+		}
+
+		return countries;
+	}
+
 }

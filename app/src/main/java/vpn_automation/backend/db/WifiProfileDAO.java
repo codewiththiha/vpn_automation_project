@@ -56,6 +56,30 @@ public class WifiProfileDAO {
 		return profileIds;
 	}
 
+	public static List<String> getWifiNames(int userId) {
+		List<String> wifiNames = new ArrayList<>();
+
+		String query = "SELECT wifi_name from WifiProfile where user_id = ?";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, userId);
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				String wifiName = rs.getString("wifi_name");
+				wifiNames.add(wifiName);
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error adding wifiName");
+			e.printStackTrace();
+		}
+
+		return wifiNames;
+	}
+
 	public static int getActiveWifiProfileId() {
 		String query = "SELECT wifi_profile_id FROM WifiProfile WHERE active_profile =1;";
 
@@ -73,6 +97,47 @@ public class WifiProfileDAO {
 			System.err.println("Error retrieving wifiProfileID:");
 			e.printStackTrace();
 			return -1;
+		}
+	}
+
+	public static void setSelectedWifiNameActive(String wifiName) {
+		String deactivateQuery = "UPDATE WifiProfile SET active_profile = 0";
+		String activateQuery = "UPDATE WifiProfile SET active_profile = 1 WHERE wifi_name = ?";
+
+		try (Connection conn = DBConnection.getConnection()) {
+			// Deactivate all profiles first
+			try (PreparedStatement pstmt1 = conn.prepareStatement(deactivateQuery)) {
+				pstmt1.executeUpdate();
+			}
+
+			// Activate only the selected profile
+			try (PreparedStatement pstmt2 = conn.prepareStatement(activateQuery)) {
+				pstmt2.setString(1, wifiName);
+				pstmt2.executeUpdate();
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error updating active_profile:");
+			e.printStackTrace();
+		}
+	}
+
+	public static String getActiveWifiProfileName() {
+		String query = "SELECT wifi_name from WifiProfile WHERE active_profile = 1";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query);
+				ResultSet rs = pstmt.executeQuery()) {
+
+			if (rs.next()) {
+				// Return the first active wifiProfileID found
+				return rs.getString("wifi_name");
+			} else {
+				return "WifiProfile";
+			}
+		} catch (SQLException e) {
+			System.err.println("Error retrieving wifiProfileID:");
+			e.printStackTrace();
+			return "WifiProfile";
 		}
 	}
 }
