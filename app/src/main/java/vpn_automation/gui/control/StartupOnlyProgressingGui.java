@@ -2,6 +2,7 @@ package vpn_automation.gui.control;
 
 import java.sql.SQLException;
 import javafx.animation.KeyFrame;
+import javafx.application.Platform;
 import javafx.animation.Timeline;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -60,12 +61,13 @@ public class StartupOnlyProgressingGui {
 		});
 
 		backgroundThread = new Thread(backgroundTask);
+		// close with the gui
 		backgroundThread.setDaemon(true);
 		backgroundThread.start();
 	}
 
 	public void updateGuiMessage(String message) {
-		javafx.application.Platform.runLater(() -> adjustable_text.setText(message));
+		Platform.runLater(() -> adjustable_text.setText(message));
 	}
 
 	int current = 0;

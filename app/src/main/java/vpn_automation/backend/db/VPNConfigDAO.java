@@ -178,4 +178,117 @@ public class VPNConfigDAO {
 		return countries;
 	}
 
+	public static String getOvpnConnection(int activeWifiProfileId, String encodedName) {
+		String query = "SELECT ovpn_file_path FROM VPNConfig WHERE wifi_profile_id = ? AND encoded_names = ?";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeWifiProfileId);
+			pstmt.setString(2, encodedName);
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					// Return the file path if a match is found
+					return rs.getString("ovpn_file_path");
+				} else {
+					// No matching row found
+					return null;
+				}
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving ovpn_file_path:");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static void SetConnection(int activeWifiProfileId, String encodedName) {
+		String query = "UPDATE VPNConfig SET is_connected = 1 WHERE wifi_profile_id = ? AND encoded_names = ?";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeWifiProfileId);
+			pstmt.setString(2, encodedName);
+
+			// Execute the update
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Set connection to " + encodedName);
+			} else {
+				System.out.println("Failed");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void SetVpnDisconnect() {
+		String query = "UPDATE VPNConfig SET is_connected = 0";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			// Execute the update
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Every Role set to 0");
+			} else {
+				System.out.println("Failed");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static String GetConnectedCountry() {
+		String query = "SELECT country from VPNConfig WHERE is_connected = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+
+					return rs.getString("country");
+				} else {
+					// No matching row found
+					return null;
+				}
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving country");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static String GetConnectedIpAddress() {
+		String query = "SELECT ip_address from VPNConfig WHERE is_connected = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+
+					return rs.getString("ip_address");
+				} else {
+
+					return null;
+				}
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving Ip");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 }

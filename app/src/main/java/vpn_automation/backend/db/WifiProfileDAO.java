@@ -140,4 +140,50 @@ public class WifiProfileDAO {
 			return "WifiProfile";
 		}
 	}
+
+	public static String GetCurrentIpAddress() {
+		String query = "SELECT current_ip_address FROM WifiProfile where active_profile = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+
+					return rs.getString("current_ip_address");
+				} else {
+
+					return null;
+				}
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving Ip");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static String GetCurrentCountry() {
+		String query = "SELECT original_location FROM WifiProfile where active_profile = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+
+					return rs.getString("original_location");
+				} else {
+
+					return null;
+				}
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving Ip");
+			e.printStackTrace();
+			return null;
+		}
+	}
 }
