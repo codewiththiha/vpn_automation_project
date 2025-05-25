@@ -30,9 +30,12 @@ public class OvpnFileTester {
 				guiUpdater.accept("No .ovpn files found in the current directory");
 				return workingFiles;
 			}
-			// you can specify here for the user limit option
+
 			for (Path file : ovpnFiles) {
 				try {
+					if (workingFiles.size() == 1) { // you can specify here for the user limit option
+						break;
+					}
 					if (FileUtils.isChecked(file.toString())) {
 						guiUpdater.accept("Skipping already checked file: " + file.getFileName());
 						continue;
@@ -91,6 +94,8 @@ public class OvpnFileTester {
 						// guiUpdater.accept(line);
 						System.out.println(line);
 						if (line.contains("Initialization Sequence Completed")) {
+							System.out.println("Adding");
+							IPInfoFetcher.clearCache();
 							VPNConfigDAO.insertOvpnFilePaths(file.toString(), activeWifiProfileId,
 									IPInfoFetcher.getIPAddress(),
 									IPInfoFetcher.getCountry(), now);

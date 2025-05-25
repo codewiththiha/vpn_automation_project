@@ -31,7 +31,7 @@ public class StartupOnlyProgressingGui {
 	public void initialize() throws SQLException, Exception {
 		if (web_view_component != null) {
 			WebEngine engine = web_view_component.getEngine();
-			String gifPath = getClass().getResource("/assets/dancing_panda.gif").toExternalForm();
+			String gifPath = getClass().getResource("/assets/loading_third.gif").toExternalForm();
 			engine.load(gifPath);
 		}
 

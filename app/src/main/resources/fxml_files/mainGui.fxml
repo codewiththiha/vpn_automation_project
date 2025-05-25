@@ -20,30 +20,30 @@
         <tabs>
           <Tab text="MainInterFace">
                <content>
-                  <VBox alignment="TOP_CENTER" fillWidth="false" prefHeight="494.0" prefWidth="318.0" spacing="30.0">
+                  <VBox alignment="TOP_CENTER" fillWidth="false" prefHeight="494.0" prefWidth="285.0" spacing="30.0">
                      <children>
-                        <ComboBox fx:id="vpn_profile_combo_box" prefWidth="150.0" promptText="VpnProfile">
+                        <ComboBox fx:id="vpn_profile_combo_box" prefHeight="40.0" prefWidth="200.0" promptText="VpnProfile">
                            <VBox.margin>
                               <Insets />
                            </VBox.margin>
                         </ComboBox>
-                        <ComboBox fx:id="config_combo_box" prefWidth="150.0" promptText="Vpn" />
-                        <Button fx:id="connect_button" mnemonicParsing="false" text="Connect" />
+                        <ComboBox fx:id="config_combo_box" prefHeight="40.0" prefWidth="200.0" promptText="Vpn" />
+                        <Button fx:id="connect_button" minHeight="40.0" mnemonicParsing="false" text="Connect" />
                         <AnchorPane prefHeight="198.0" prefWidth="200.0">
                            <children>
                               <Label fx:id="current_location_label" layoutX="5.0" layoutY="50.0" text="Current Location: Myanmar" textAlignment="CENTER" textFill="WHITE">
                                  <font>
-                                    <Font name="JetBrains Mono Bold" size="13.0" />
+                                    <Font name="JetBrains Mono Bold" size="14.0" />
                                  </font>
                               </Label>
                               <Label fx:id="current_ip_label" layoutX="5.0" layoutY="88.0" text="ip:" textAlignment="CENTER" textFill="WHITE">
                                  <font>
-                                    <Font name="JetBrains Mono Bold" size="13.0" />
+                                    <Font name="JetBrains Mono Bold" size="14.0" />
                                  </font>
                               </Label>
                               <Label fx:id="connect_status_label" layoutX="65.0" layoutY="14.0" text="Connected" textAlignment="CENTER" textFill="WHITE">
                                  <font>
-                                    <Font name="JetBrains Mono Bold" size="13.0" />
+                                    <Font name="JetBrains Mono Bold" size="14.0" />
                                  </font>
                               </Label>
                            </children>
@@ -160,7 +160,7 @@
       </TabPane>
    </center>
    <right>
-      <WebView prefHeight="525.0" prefWidth="521.0" BorderPane.alignment="CENTER" />
+      <WebView prefHeight="525.0" prefWidth="449.0" BorderPane.alignment="CENTER" />
    </right>
    <left>
       <AnchorPane prefHeight="373.0" prefWidth="0.0" BorderPane.alignment="CENTER" />

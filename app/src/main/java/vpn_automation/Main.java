@@ -2,8 +2,7 @@ package vpn_automation;
 
 import java.sql.SQLException;
 
-import vpn_automation.backend.OvpnFileModifier;
-import vpn_automation.backend.OvpnFileTester;
+import vpn_automation.backend.IPInfoFetcher;
 import vpn_automation.backend.db.VPNConfigDAO;
 
 // Main class to run the program
@@ -17,6 +16,9 @@ public class Main {
 
 		// modifier.modifyOvpnFiles(currentDir);
 		// tester.testOvpnFiles(currentDir);
-		VPNConfigDAO.refreshAndGenerateEncodedCountries(5);
+		// VPNConfigDAO.refreshAndGenerateEncodedCountries(5);
+		String country = IPInfoFetcher.getIPAddress();
+		String ip = IPInfoFetcher.getCountry();
+		System.out.println(country + " " + ip);
 	}
 }

@@ -13,7 +13,8 @@ public class VPNManager {
 
 	public static void connectVpn(String ovpnPath, Consumer<String> ConnectStatusGui,
 			Consumer<String> LocationStatusGui,
-			Consumer<String> IpStatusGui, int activeWifiProfileId, String encodedName) // can use runnable
+			Consumer<String> IpStatusGui, int activeWifiProfileId, String encodedName,
+			Consumer<String> ConnectButtonGui) // can use runnable
 			throws IOException {
 		if (ovpnPath == null || ovpnPath.isEmpty()) {
 			ConnectStatusGui.accept("Error: OVPN file path is empty.");
@@ -41,6 +42,7 @@ public class VPNManager {
 						LocationStatusGui.accept("Current Location: " + CountryCodeConverter.getCountryName(
 								VPNConfigDAO.GetConnectedCountry()));
 						IpStatusGui.accept("Ip: " + VPNConfigDAO.GetConnectedIpAddress());
+						ConnectButtonGui.accept("Disconnect");
 						connected = true;
 
 					} else if (!connected) {
@@ -90,7 +92,7 @@ public class VPNManager {
 
 			int exitCode = process.waitFor();
 			if (exitCode == 0) {
-				ConnectStatusGui.accept("All OpenVPN processes successfully terminated.");
+				ConnectStatusGui.accept("Disconnected");
 			} else {
 				ConnectStatusGui.accept("No running OpenVPN processes found.");
 			}

@@ -49,7 +49,8 @@ public class StartupOnlyGui {
 		if (wifiBrand.isEmpty() || wifiBrand.isEmpty()) {
 			dialog.setErrorMessage("Please fill the Fields first");
 		} else {
-			WifiProfileDAO.makeWifiProfileForLoggedInUser(userID, wifiBrand, currentIPAddress, currentLocation,
+			WifiProfileDAO.makeWifiProfileForLoggedInUser(userID, wifiBrand.toLowerCase(), currentIPAddress,
+					currentLocation,
 					wifiName);
 			List<Integer> wifiProfileIds = WifiProfileDAO.getWifiProfileIds(userID);
 			if (wifiProfileIds.size() == 1) {

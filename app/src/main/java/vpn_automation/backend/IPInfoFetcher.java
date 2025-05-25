@@ -6,8 +6,15 @@ import org.json.JSONObject;
 
 public class IPInfoFetcher {
 
+	private static JSONObject cachedIPInfo = null;
+
 	private static JSONObject fetchIPInfo() throws Exception {
-		ProcessBuilder processBuilder = new ProcessBuilder("curl", "-s", "ipinfo.io");
+		if (cachedIPInfo != null) {
+			return cachedIPInfo;
+		}
+
+		ProcessBuilder processBuilder = new ProcessBuilder("curl", "-s",
+				"https://api.ipinfo.io/lite/me?token=44936a1f60206d");
 		processBuilder.redirectErrorStream(true);
 		Process process = processBuilder.start();
 
@@ -23,11 +30,18 @@ public class IPInfoFetcher {
 		int exitCode = process.waitFor();
 		if (exitCode != 0) {
 			System.err.println("cURL failed to fetch IP info (exit code: " + exitCode + ")");
-			// Return a default JSON object instead of throwing
 			return new JSONObject();
 		}
 
-		return new JSONObject(output.toString());
+		String jsonResponse = output.toString();
+		try {
+			cachedIPInfo = new JSONObject(jsonResponse);
+		} catch (Exception e) {
+			System.err.println("Failed to parse JSON response: " + jsonResponse);
+			return new JSONObject();
+		}
+
+		return cachedIPInfo;
 	}
 
 	public static String getIPAddress() throws Exception {
@@ -37,6 +51,10 @@ public class IPInfoFetcher {
 
 	public static String getCountry() throws Exception {
 		JSONObject info = fetchIPInfo();
-		return info.optString("country", "unknown");
+		return info.optString("country_code", "unknown");
+	}
+
+	public static void clearCache() {
+		cachedIPInfo = null;
 	}
 }
