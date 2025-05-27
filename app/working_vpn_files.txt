@@ -1,3 +1,3 @@
 Working VPN Configuration Files:
 ----------------------------------------
-/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_public-vpn-221.opengw.net_udp_1195.ovpn
+/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_vpn960273320.opengw.net_tcp_1571.ovpn

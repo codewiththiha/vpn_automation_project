@@ -18,7 +18,8 @@ import vpn_automation.backend.db.WifiProfileDAO;
 public class OvpnFileTester {
 	private final static int TIMEOUT_SECONDS = 20;
 
-	public List<String> testOvpnFiles(String directory, Consumer<String> guiUpdater) throws SQLException, Exception {
+	public List<String> testOvpnFiles(String directory, Consumer<String> guiUpdater, int Limit)
+			throws SQLException, Exception {
 		guiUpdater.accept("Starting OVPN file testing...");
 		guiUpdater.accept("Scanning directory: " + directory);
 
@@ -32,8 +33,12 @@ public class OvpnFileTester {
 			}
 
 			for (Path file : ovpnFiles) {
+				int SearchStatus = WifiProfileDAO.GetSearchStatus();
 				try {
-					if (workingFiles.size() == 1) { // you can specify here for the user limit option
+					if (workingFiles.size() == Limit || (SearchStatus == 0)) { // you can specify
+																				// here for the user
+						// limit
+						System.out.println("Stopped");
 						break;
 					}
 					if (FileUtils.isChecked(file.toString())) {
@@ -140,4 +145,80 @@ public class OvpnFileTester {
 			guiUpdater.accept("Error saving results: " + e.getMessage());
 		}
 	}
+
+	private static boolean testOvpnFileForDebug(String file) throws SQLException, Exception {
+		Process process = null;
+		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
+		LocalDateTime now = LocalDateTime.now();
+		try {
+			ProcessBuilder pb = new ProcessBuilder(
+					"openvpn",
+					file);
+
+			pb.redirectErrorStream(true); // Merge stdout and stderr
+			process = pb.start();
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			long startTime = System.currentTimeMillis();
+			String line;
+
+			while (true) {
+				if (reader.ready()) {
+					line = reader.readLine();
+					if (line != null) {
+						// way too much for a normal user
+						// guiUpdater.accept(line);
+						System.out.println(line);
+						if (line.contains("Initialization Sequence Completed")) {
+							System.out.println("Adding");
+							IPInfoFetcher.clearCache();
+							VPNConfigDAO.insertOvpnFilePaths(file.toString(), activeWifiProfileId,
+									IPInfoFetcher.getIPAddress(),
+									IPInfoFetcher.getCountry(), now);
+							return true;
+						}
+					}
+				}
+
+				if (System.currentTimeMillis() - startTime >= TIMEOUT_SECONDS * 1000) {
+					System.out.println(
+							"Timeout: " + file + " failed within " + TIMEOUT_SECONDS + " seconds");
+
+					return false;
+				}
+
+				Thread.sleep(100);
+			}
+
+		} catch (IOException | InterruptedException e) {
+			System.out.println("Error testing " + file + ": " + e.getMessage());
+
+			return false;
+		} finally {
+			if (process != null && process.isAlive()) {
+				process.destroy();
+				try {
+					process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS);
+				} catch (InterruptedException e) {
+					process.destroyForcibly();
+				}
+			}
+		}
+	}
+
+	public static void fixUnknownOvpns() throws SQLException, Exception {
+		int activeWifiProfileId = 9;
+		System.out.println(activeWifiProfileId);
+		while (true) {
+			List<String> files = WifiProfileDAO.getUnknownOvpnPaths(activeWifiProfileId);
+			for (String file : files) {
+				testOvpnFileForDebug(file);
+			}
+			if (files.size() == 0) {
+				break;
+			}
+		}
+
+	}
+
 }

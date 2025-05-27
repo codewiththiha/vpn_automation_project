@@ -218,7 +218,7 @@ public class VPNConfigDAO {
 			if (rowsUpdated > 0) {
 				System.out.println("Set connection to " + encodedName);
 			} else {
-				System.out.println("Failed");
+				System.out.println("Set connection Failed");
 			}
 
 		} catch (SQLException e) {
@@ -227,6 +227,7 @@ public class VPNConfigDAO {
 	}
 
 	public static void SetVpnDisconnect() {
+		// TODO this logic is incorrect need fix
 		String query = "UPDATE VPNConfig SET is_connected = 0";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -237,7 +238,7 @@ public class VPNConfigDAO {
 			if (rowsUpdated > 0) {
 				System.out.println("Every Role set to 0");
 			} else {
-				System.out.println("Failed");
+				System.out.println("Set Disconnect Failed");
 			}
 
 		} catch (SQLException e) {
@@ -288,6 +289,52 @@ public class VPNConfigDAO {
 			System.err.println("Error retrieving Ip");
 			e.printStackTrace();
 			return null;
+		}
+	}
+
+	public static String GetConnectedOvpnPath() {
+		String query = "SELECT ovpn_file_path FROM VPNConfig WHERE wifi_profile_id = ? AND is_connected = 1";
+		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeWifiProfileId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+
+					return rs.getString("ovpn_file_path");
+				} else {
+
+					return null;
+				}
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving Ip");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static void DeleteUnresponsiveOvpn(int activeWifiProfileId, String encodedName) {
+		String query = "DELETE FROM VPNConfig WHERE wifi_profile_id = ? AND encoded_names = ?";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeWifiProfileId);
+			pstmt.setString(2, encodedName);
+
+			// Execute the update
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Deleted: " + encodedName);
+			} else {
+				System.out.println("Delete Failed");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 	}
 

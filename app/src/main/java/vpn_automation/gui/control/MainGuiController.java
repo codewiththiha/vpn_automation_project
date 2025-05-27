@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -143,7 +144,7 @@ public class MainGuiController {
 			Stage stage = (Stage) connect_button.getScene().getWindow();
 			stage.setOnCloseRequest(event -> {
 				System.out.println("Window is closing. Cleaning up...");
-
+				WifiProfileDAO.ResetSearchStatus();
 				try {
 					VPNManager.disconnectVpn(this::UpdateConnectStatus);
 					VPNConfigDAO.SetVpnDisconnect();
@@ -161,26 +162,45 @@ public class MainGuiController {
 		search_ovpn_button.setOnAction(event -> {
 			// Warrning box of disconnecting Vpn should show and will continue if user
 			// confirm -- currently for test purpose
-			// limit function isn't set yet
+			// limit function
+			int limit = (int) raw_ovpn_slider.getValue();
+			if (WifiProfileDAO.GetSearchStatus() == 0) {
+				WifiProfileDAO.SetSearchStatus();
+				search_ovpn_button.setText("Cancel");
+				if (backgroundTask != null && backgroundTask.isRunning()) {
+					System.out.println("Background task stopped");
 
-			if (backgroundTask != null && backgroundTask.isRunning()) {
-				System.out.println("Background task stopped");
-				VPNManager.disconnectVpn(this::UpdateConnectStatus);
-				VPNConfigDAO.SetVpnDisconnect();
+					// TODO should show a pop up
+					VPNManager.disconnectVpn(this::UpdateConnectStatus);
+					VPNConfigDAO.SetVpnDisconnect();
+					backgroundTask.cancel();
+				}
+
+				backgroundTask = new Task<>() {
+					@Override
+					protected Void call() throws Exception {
+						SearchOvpn(currentDir, limit);
+						return null;
+					}
+				};
+
+				Thread backgroundThread = new Thread(backgroundTask);
+				backgroundThread.setDaemon(true);
+				backgroundThread.start();
+			} // should ask user if no ovpn configuration is found yet
+			else if (WifiProfileDAO.GetSearchStatus() == 1) {
+				WifiProfileDAO.ResetSearchStatus();
+				System.out.println("Stopped search");
 				backgroundTask.cancel();
+				search_ovpn_button.setText("Search");
+				return;
 			}
 
-			backgroundTask = new Task<>() {
-				@Override
-				protected Void call() throws Exception {
-					SearchOvpn(currentDir);
-					return null;
-				}
-			};
+			backgroundTask.setOnSucceeded(e -> {
+				WifiProfileDAO.ResetSearchStatus();
+				search_ovpn_button.setText("Search");
+			});
 
-			Thread backgroundThread = new Thread(backgroundTask);
-			backgroundThread.setDaemon(true);
-			backgroundThread.start();
 		});
 
 	}
@@ -252,12 +272,11 @@ public class MainGuiController {
 		Platform.runLater(() -> main_status_label.setText(message));
 	}
 
-	public void SearchOvpn(String currentDir) throws SQLException, Exception {
-
+	public void SearchOvpn(String currentDir, int Limit) throws SQLException, Exception {
 		OvpnFileModifier modifier = new OvpnFileModifier();
 		OvpnFileTester tester = new OvpnFileTester();
 
 		modifier.modifyOvpnFiles(currentDir, this::UpdateSearchStatus);
-		tester.testOvpnFiles(currentDir, this::UpdateSearchStatus);
+		tester.testOvpnFiles(currentDir, this::UpdateSearchStatus, Limit);
 	}
 }

@@ -1,6 +1,7 @@
 package vpn_automation.gui.control;
 
 import java.sql.SQLException;
+
 import javafx.animation.KeyFrame;
 import javafx.application.Platform;
 import javafx.animation.Timeline;
@@ -11,6 +12,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.util.Duration;
+import vpn_automation.backend.FileUtils;
 import vpn_automation.backend.OvpnFileModifier;
 import vpn_automation.backend.OvpnFileTester;
 
@@ -36,17 +38,16 @@ public class StartupOnlyProgressingGui {
 		}
 
 		animateProgressBarTo100InSeconds(20);
-
+		String currentDir = "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
+		int limit = FileUtils.getOvpnFiles(currentDir).size();
 		// Create background task
 		backgroundTask = new Task<>() {
 			@Override
 			protected Void call() throws Exception {
-				String currentDir = "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
 				OvpnFileModifier modifier = new OvpnFileModifier();
 				OvpnFileTester tester = new OvpnFileTester();
-
 				modifier.modifyOvpnFiles(currentDir, StartupOnlyProgressingGui.this::updateGuiMessage);
-				tester.testOvpnFiles(currentDir, StartupOnlyProgressingGui.this::updateGuiMessage);
+				tester.testOvpnFiles(currentDir, StartupOnlyProgressingGui.this::updateGuiMessage, limit);
 
 				return null;
 			}
@@ -88,12 +89,13 @@ public class StartupOnlyProgressingGui {
 		timeline.play();
 	}
 
-	public void main() throws SQLException, Exception {
-		String currentDir = "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
-		OvpnFileModifier modifier = new OvpnFileModifier();
-		OvpnFileTester tester = new OvpnFileTester();
+	// public void main() throws SQLException, Exception {
+	// String currentDir =
+	// "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
+	// OvpnFileModifier modifier = new OvpnFileModifier();
+	// OvpnFileTester tester = new OvpnFileTester();
 
-		modifier.modifyOvpnFiles(currentDir, this::updateGuiMessage);
-		tester.testOvpnFiles(currentDir, this::updateGuiMessage);
-	}
+	// modifier.modifyOvpnFiles(currentDir, this::updateGuiMessage);
+	// tester.testOvpnFiles(currentDir, this::updateGuiMessage);
+	// }
 }

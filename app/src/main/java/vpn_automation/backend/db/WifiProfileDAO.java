@@ -186,4 +186,95 @@ public class WifiProfileDAO {
 			return null;
 		}
 	}
+
+	public static int GetSearchStatus() {
+		String query = "SELECT search_status FROM WifiProfile WHERE wifi_profile_id = ?";
+
+		int activeProfileId = getActiveWifiProfileId();
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeProfileId);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt("search_status");
+				} else {
+					System.out.println("No profile found for wifi_profile_id: " + activeProfileId);
+					return 0;
+				}
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving search status: " + e.getMessage());
+			e.printStackTrace();
+			return 0;
+		}
+	}
+
+	public static void SetSearchStatus() {
+		String query = "UPDATE WifiProfile SET search_status =1 WHERE wifi_profile_id = ?";
+		int activeProfileId = getActiveWifiProfileId();
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeProfileId);
+			// Execute the update
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Search Status set to 1");
+			} else {
+				System.out.println("Failed");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void ResetSearchStatus() {
+		String query = "UPDATE WifiProfile SET search_status = 0 WHERE wifi_profile_id = ?";
+		int activeProfileId = getActiveWifiProfileId();
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeProfileId);
+			// Execute the update
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Search Status set to 0");
+			} else {
+				System.out.println("Failed");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static List<String> getUnknownOvpnPaths(int activeWifiProfileId) {
+		List<String> unknownOvpnPaths = new ArrayList<>();
+
+		String query = "SELECT ovpn_file_path FROM VPNConfig WHERE wifi_profile_id = ? AND (country = 'unknown' OR ip_address = 'unknown')";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeWifiProfileId);
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				String unknownOvpn = rs.getString("ovpn_file_path");
+				unknownOvpnPaths.add(unknownOvpn);
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error adding Ovpns");
+			e.printStackTrace();
+		}
+
+		return unknownOvpnPaths;
+	}
 }

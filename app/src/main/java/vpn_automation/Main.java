@@ -3,7 +3,9 @@ package vpn_automation;
 import java.sql.SQLException;
 
 import vpn_automation.backend.IPInfoFetcher;
+import vpn_automation.backend.OvpnFileTester;
 import vpn_automation.backend.db.VPNConfigDAO;
+import vpn_automation.backend.db.WifiProfileDAO;
 
 // Main class to run the program
 public class Main {
@@ -17,8 +19,14 @@ public class Main {
 		// modifier.modifyOvpnFiles(currentDir);
 		// tester.testOvpnFiles(currentDir);
 		// VPNConfigDAO.refreshAndGenerateEncodedCountries(5);
-		String country = IPInfoFetcher.getIPAddress();
-		String ip = IPInfoFetcher.getCountry();
-		System.out.println(country + " " + ip);
+		// String country = IPInfoFetcher.getIPAddress();
+		// String ip = IPInfoFetcher.getCountry();
+		// System.out.println(country + " " + ip);
+		// System.out.println(WifiProfileDAO.GetSearchStatus());
+		// System.out.println(WifiProfileDAO.getActiveWifiProfileId());
+		// System.out.println(WifiProfileDAO.GetCurrentCountry());
+		// WifiProfileDAO.SetSearchStatus();
+		// WifiProfileDAO.ResetSearchStatus();
+		OvpnFileTester.fixUnknownOvpns();
 	}
 }
