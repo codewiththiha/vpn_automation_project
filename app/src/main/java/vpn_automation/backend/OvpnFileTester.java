@@ -150,11 +150,9 @@ public class OvpnFileTester {
 		Process process = null;
 		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
 		LocalDateTime now = LocalDateTime.now();
-		try {
-			ProcessBuilder pb = new ProcessBuilder(
-					"openvpn",
-					file);
 
+		try {
+			ProcessBuilder pb = new ProcessBuilder("openvpn", file);
 			pb.redirectErrorStream(true); // Merge stdout and stderr
 			process = pb.start();
 
@@ -162,37 +160,37 @@ public class OvpnFileTester {
 			long startTime = System.currentTimeMillis();
 			String line;
 
-			while (true) {
-				if (reader.ready()) {
-					line = reader.readLine();
-					if (line != null) {
-						// way too much for a normal user
-						// guiUpdater.accept(line);
-						System.out.println(line);
-						if (line.contains("Initialization Sequence Completed")) {
-							System.out.println("Adding");
-							IPInfoFetcher.clearCache();
-							VPNConfigDAO.insertOvpnFilePaths(file.toString(), activeWifiProfileId,
-									IPInfoFetcher.getIPAddress(),
-									IPInfoFetcher.getCountry(), now);
-							return true;
-						}
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+
+				if (line.contains("Initialization Sequence Completed")) {
+					System.out.println("Adding");
+					IPInfoFetcher.clearCache();
+					String ip = IPInfoFetcher.getIPAddress();
+					String country = IPInfoFetcher.getCountry();
+					VPNConfigDAO.UpdateOvpnFilePaths(file, activeWifiProfileId, ip, country, now);
+					return true;
+				}
+
+				// Check for errors or timeout every iteration
+				for (String errorKeyword : VPNManager.errorKeywords) {
+					if (line.contains(errorKeyword)) {
+						System.out.println("Error detected: " + errorKeyword);
+						return false;
 					}
 				}
 
-				if (System.currentTimeMillis() - startTime >= TIMEOUT_SECONDS * 1000) {
-					System.out.println(
-							"Timeout: " + file + " failed within " + TIMEOUT_SECONDS + " seconds");
-
+				if (System.currentTimeMillis() - startTime >= 25 * 1000) {
+					System.out.println("Timeout reached.");
 					return false;
 				}
-
-				Thread.sleep(100);
 			}
+
+			// If we exit loop without returning, assume failure
+			return false;
 
 		} catch (IOException | InterruptedException e) {
 			System.out.println("Error testing " + file + ": " + e.getMessage());
-
 			return false;
 		} finally {
 			if (process != null && process.isAlive()) {
@@ -201,20 +199,85 @@ public class OvpnFileTester {
 					process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS);
 				} catch (InterruptedException e) {
 					process.destroyForcibly();
+					Thread.currentThread().interrupt(); // Restore interrupt status
 				}
 			}
 		}
 	}
 
+	public static boolean testOvpnFileReCheck(String file) throws SQLException, Exception {
+		Process process = null;
+
+		try {
+			ProcessBuilder pb = new ProcessBuilder("openvpn", file);
+			pb.redirectErrorStream(true); // Merge stdout and stderr
+			process = pb.start();
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			long startTime = System.currentTimeMillis();
+			String line;
+
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+
+				if (line.contains("Initialization Sequence Completed")) {
+					System.out.println("Adding");
+					IPInfoFetcher.clearCache();
+
+					return true;
+				}
+
+				for (String errorKeyword : VPNManager.errorKeywords) {
+					if (line.contains(errorKeyword)) {
+						System.out.println("Error detected: " + errorKeyword);
+						return false;
+					}
+				}
+
+				if (System.currentTimeMillis() - startTime >= 25 * 1000) {
+					System.out.println("Timeout reached.");
+					return false;
+				}
+			}
+
+			return false;
+
+		} catch (IOException e) {
+			System.out.println("Error testing " + file + ": " + e.getMessage());
+			return false;
+		} finally {
+			if (process != null && process.isAlive()) {
+				process.destroy();
+				try {
+					process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS);
+				} catch (InterruptedException e) {
+					process.destroyForcibly();
+					Thread.currentThread().interrupt();
+				}
+			}
+		}
+	}
+
+	// should add at the end of each tested conditions
 	public static void fixUnknownOvpns() throws SQLException, Exception {
-		int activeWifiProfileId = 9;
+		int activeWifiProfileId = 10;
 		System.out.println(activeWifiProfileId);
 		while (true) {
-			List<String> files = WifiProfileDAO.getUnknownOvpnPaths(activeWifiProfileId);
+			List<String> files = VPNConfigDAO.getUnknownOvpnPaths(activeWifiProfileId);
+			System.out.println(files.size());
 			for (String file : files) {
-				testOvpnFileForDebug(file);
+				if (testOvpnFileForDebug(file)) {
+
+					System.out.println("Success " + file);
+
+				} else {
+					VPNConfigDAO.DeleteUnresponsiveOvpnByPath(activeWifiProfileId, file);
+					// VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId);
+				}
 			}
+
 			if (files.size() == 0) {
+				VPNManager.disconnectVpn();
 				break;
 			}
 		}

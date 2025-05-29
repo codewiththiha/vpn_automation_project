@@ -17,7 +17,7 @@ public class VPNConfigDAO {
 	public static void insertOvpnFilePaths(String ovpnFilePath, int wifiProfileId, String ipAddress, String country,
 			LocalDateTime now)
 			throws SQLException {
-		String insertQuery = "INSERT INTO VPNConfig (wifi_profile_id, ovpn_file_path, ip_address, country, last_checked) VALUES (?, ?, ?, ?, ?)";
+		String insertQuery = "INSERT INTO vpnconfig (wifi_profile_id, ovpn_file_path, ip_address, country, last_checked) VALUES (?, ?, ?, ?, ?)";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(insertQuery)) {
@@ -40,7 +40,7 @@ public class VPNConfigDAO {
 
 	public static List<Integer> giveWifiProfileIdGetvpnConfigIds(int wifiProfileID) {
 		List<Integer> vpnConfigIds = new ArrayList<>();
-		String query = "SELECT config_id FROM VPNConfig WHERE wifi_profile_id = ?";
+		String query = "SELECT config_id FROM vpnconfig WHERE wifi_profile_id = ?";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
 
@@ -62,7 +62,7 @@ public class VPNConfigDAO {
 
 	public static List<String> giveWifiProfileIdCheckedGetOvpnFilesPaths(int wifiProfileID) {
 		List<String> ovpnFilePaths = new ArrayList<>();
-		String query = "SELECT ovpn_file_path FROM VPNConfig WHERE wifi_profile_id = ?  AND last_checked > NOW() - INTERVAL 3 DAY";
+		String query = "SELECT ovpn_file_path FROM vpnconfig WHERE wifi_profile_id = ?  AND last_checked > NOW() - INTERVAL 3 DAY";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
 
@@ -84,7 +84,7 @@ public class VPNConfigDAO {
 
 	public static List<String> getCountries(int wifiProfileID) {
 		List<String> countries = new ArrayList<>();
-		String query = "SELECT country FROM VPNConfig WHERE wifi_profile_id = ?";
+		String query = "SELECT country FROM vpnconfig WHERE wifi_profile_id = ?";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
 
@@ -116,7 +116,7 @@ public class VPNConfigDAO {
 	}
 
 	public static void replaceWithNULLToEncoded(int wifiProfileId) {
-		String query = "UPDATE VPNConfig SET encoded_names = NULL where wifi_profile_id = ?";
+		String query = "UPDATE vpnconfig SET encoded_names = NULL where wifi_profile_id = ?";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
 			pstmt.setInt(1, wifiProfileId);
@@ -132,7 +132,7 @@ public class VPNConfigDAO {
 	}
 
 	public static void setEncodedCountries(String encodedName, String countryCode, int wifiProfileId) {
-		String query = "UPDATE VPNConfig SET encoded_names = ? WHERE country = ? AND wifi_profile_id = ? AND encoded_names IS NULL LIMIT 1";
+		String query = "UPDATE vpnconfig SET encoded_names = ? WHERE country = ? AND wifi_profile_id = ? AND encoded_names IS NULL LIMIT 1";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -158,7 +158,7 @@ public class VPNConfigDAO {
 
 	public static List<String> getEncodedCountries(int wifiProfileID) {
 		List<String> countries = new ArrayList<>();
-		String query = "SELECT encoded_names FROM VPNConfig WHERE wifi_profile_id = ?";
+		String query = "SELECT encoded_names FROM vpnconfig WHERE wifi_profile_id = ?";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
 
@@ -179,7 +179,7 @@ public class VPNConfigDAO {
 	}
 
 	public static String getOvpnConnection(int activeWifiProfileId, String encodedName) {
-		String query = "SELECT ovpn_file_path FROM VPNConfig WHERE wifi_profile_id = ? AND encoded_names = ?";
+		String query = "SELECT ovpn_file_path FROM vpnconfig WHERE wifi_profile_id = ? AND encoded_names = ?";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -205,7 +205,7 @@ public class VPNConfigDAO {
 	}
 
 	public static void SetConnection(int activeWifiProfileId, String encodedName) {
-		String query = "UPDATE VPNConfig SET is_connected = 1 WHERE wifi_profile_id = ? AND encoded_names = ?";
+		String query = "UPDATE vpnconfig SET is_connected = 1 WHERE wifi_profile_id = ? AND encoded_names = ?";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
 
@@ -228,7 +228,7 @@ public class VPNConfigDAO {
 
 	public static void SetVpnDisconnect() {
 		// TODO this logic is incorrect need fix
-		String query = "UPDATE VPNConfig SET is_connected = 0";
+		String query = "UPDATE vpnconfig SET is_connected = 0";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
 
@@ -247,7 +247,7 @@ public class VPNConfigDAO {
 	}
 
 	public static String GetConnectedCountry() {
-		String query = "SELECT country from VPNConfig WHERE is_connected = 1";
+		String query = "SELECT country from vpnconfig WHERE is_connected = 1";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -270,7 +270,7 @@ public class VPNConfigDAO {
 	}
 
 	public static String GetConnectedIpAddress() {
-		String query = "SELECT ip_address from VPNConfig WHERE is_connected = 1";
+		String query = "SELECT ip_address from vpnconfig WHERE is_connected = 1";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -293,7 +293,7 @@ public class VPNConfigDAO {
 	}
 
 	public static String GetConnectedOvpnPath() {
-		String query = "SELECT ovpn_file_path FROM VPNConfig WHERE wifi_profile_id = ? AND is_connected = 1";
+		String query = "SELECT ovpn_file_path FROM vpnconfig WHERE wifi_profile_id = ? AND is_connected = 1";
 		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -316,19 +316,19 @@ public class VPNConfigDAO {
 		}
 	}
 
-	public static void DeleteUnresponsiveOvpn(int activeWifiProfileId, String encodedName) {
-		String query = "DELETE FROM VPNConfig WHERE wifi_profile_id = ? AND encoded_names = ?";
+	public static void DeleteUnresponsiveOvpn(int activeWifiProfileId, String ovpnPath) {
+		String query = "DELETE FROM vpnconfig WHERE wifi_profile_id = ? AND ovpn_file_path = ?";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
 
 			pstmt.setInt(1, activeWifiProfileId);
-			pstmt.setString(2, encodedName);
+			pstmt.setString(2, ovpnPath);
 
 			// Execute the update
 			int rowsUpdated = pstmt.executeUpdate();
 
 			if (rowsUpdated > 0) {
-				System.out.println("Deleted: " + encodedName);
+				System.out.println("Deleted: " + ovpnPath);
 			} else {
 				System.out.println("Delete Failed");
 			}
@@ -336,6 +336,124 @@ public class VPNConfigDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static void DeleteUnresponsiveOvpnByPath(int activeWifiProfileId, String ovpnPath) {
+		String query = "DELETE FROM vpnconfig WHERE wifi_profile_id = ? AND ovpn_file_path = ?";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeWifiProfileId);
+			pstmt.setString(2, ovpnPath);
+
+			// Execute the update
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Deleted: " + ovpnPath);
+			} else {
+				System.out.println("Delete Failed");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void UpdateOvpnFilePaths(String ovpnFilePath, int wifiProfileId, String ipAddress, String country,
+			LocalDateTime now)
+			throws SQLException {
+		String insertQuery = "UPDATE vpnconfig SET ip_address = ?, country = ?, last_checked = ? WHERE wifi_profile_id = ? AND ovpn_file_path =?";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(insertQuery)) {
+
+			pstmt.setString(1, ipAddress);
+			pstmt.setString(2, country);
+			pstmt.setObject(3, now);
+			pstmt.setInt(4, wifiProfileId);
+			pstmt.setString(5, ovpnFilePath);
+
+			int rowsAffected = pstmt.executeUpdate();
+
+			if (rowsAffected > 0) {
+				System.out.println(rowsAffected + " row(s) updated successfully.");
+			} else {
+				System.out.println("No matching row found for update.");
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error updating OVPN file paths:");
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	public static void DeleteAll() {
+		String query = "DELETE FROM wifiprofile where wifi_profile_id = 8";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			// Execute the update
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Deleted");
+			} else {
+				System.out.println("Delete Failed");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static List<String> getUnknownOvpnPaths(int activeWifiProfileId) {
+		List<String> unknownOvpnPaths = new ArrayList<>();
+
+		String query = "SELECT ovpn_file_path FROM vpnconfig WHERE wifi_profile_id = ? AND (country = 'unknown' OR ip_address = 'unknown')";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeWifiProfileId);
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				String unknownOvpn = rs.getString("ovpn_file_path");
+				unknownOvpnPaths.add(unknownOvpn);
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error adding Ovpns");
+			e.printStackTrace();
+		}
+
+		return unknownOvpnPaths;
+	}
+
+	public static List<String> getActiveProfileOvpnPaths(int activeWifiProfileId) {
+		List<String> ovpnPaths = new ArrayList<>();
+
+		String query = "SELECT ovpn_file_path FROM vpnconfig WHERE wifi_profile_id = ?";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeWifiProfileId);
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				String ovpnPath = rs.getString("ovpn_file_path");
+				ovpnPaths.add(ovpnPath);
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error adding Ovpns");
+			e.printStackTrace();
+		}
+
+		return ovpnPaths;
 	}
 
 }

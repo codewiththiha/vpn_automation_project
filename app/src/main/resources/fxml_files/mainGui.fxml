@@ -48,6 +48,7 @@
                               </Label>
                            </children>
                         </AnchorPane>
+                        <Button fx:id="recheck_button" mnemonicParsing="false" text="Recheck" />
                      </children>
                      <opaqueInsets>
                         <Insets />

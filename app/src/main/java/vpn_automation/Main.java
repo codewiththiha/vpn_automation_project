@@ -1,11 +1,10 @@
 package vpn_automation;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
-import vpn_automation.backend.IPInfoFetcher;
 import vpn_automation.backend.OvpnFileTester;
 import vpn_automation.backend.db.VPNConfigDAO;
-import vpn_automation.backend.db.WifiProfileDAO;
 
 // Main class to run the program
 public class Main {
@@ -27,6 +26,10 @@ public class Main {
 		// System.out.println(WifiProfileDAO.GetCurrentCountry());
 		// WifiProfileDAO.SetSearchStatus();
 		// WifiProfileDAO.ResetSearchStatus();
+		// VPNConfigDAO.DeleteAll();
 		OvpnFileTester.fixUnknownOvpns();
+		// VPNConfigDAO.insertOvpnFilePaths("test", 8,
+		// IPInfoFetcher.getIPAddress(),
+		// "unknown", now);
 	}
 }

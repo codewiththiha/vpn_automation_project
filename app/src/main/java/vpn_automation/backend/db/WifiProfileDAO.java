@@ -11,7 +11,7 @@ public class WifiProfileDAO {
 	public static void makeWifiProfileForLoggedInUser(int userID, String wifiBrand, String currentIpAddress,
 			String originalCountry, String wifiName)
 			throws SQLException {
-		String insertQuery = "INSERT INTO WifiProfile (user_id, wifi_brand, current_ip_address, original_location, wifi_name) VALUES (?, ?, ?, ?, ?)";
+		String insertQuery = "INSERT INTO wifiprofile (user_id, wifi_brand, current_ip_address, original_location, wifi_name) VALUES (?, ?, ?, ?, ?)";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(insertQuery)) {
@@ -35,7 +35,7 @@ public class WifiProfileDAO {
 	public static List<Integer> getWifiProfileIds(int userId) {
 		List<Integer> profileIds = new ArrayList<>();
 
-		String query = "SELECT wifi_profile_id FROM WifiProfile WHERE user_id = ?";
+		String query = "SELECT wifi_profile_id FROM wifiprofile WHERE user_id = ?";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -59,7 +59,7 @@ public class WifiProfileDAO {
 	public static List<String> getWifiNames(int userId) {
 		List<String> wifiNames = new ArrayList<>();
 
-		String query = "SELECT wifi_name from WifiProfile where user_id = ?";
+		String query = "SELECT wifi_name from wifiprofile where user_id = ?";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -81,7 +81,7 @@ public class WifiProfileDAO {
 	}
 
 	public static int getActiveWifiProfileId() {
-		String query = "SELECT wifi_profile_id FROM WifiProfile WHERE active_profile =1;";
+		String query = "SELECT wifi_profile_id FROM wifiprofile WHERE active_profile =1;";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query);
@@ -101,8 +101,8 @@ public class WifiProfileDAO {
 	}
 
 	public static void setSelectedWifiNameActive(String wifiName) {
-		String deactivateQuery = "UPDATE WifiProfile SET active_profile = 0";
-		String activateQuery = "UPDATE WifiProfile SET active_profile = 1 WHERE wifi_name = ?";
+		String deactivateQuery = "UPDATE wifiprofile SET active_profile = 0";
+		String activateQuery = "UPDATE wifiprofile SET active_profile = 1 WHERE wifi_name = ?";
 
 		try (Connection conn = DBConnection.getConnection()) {
 			// Deactivate all profiles first
@@ -123,7 +123,7 @@ public class WifiProfileDAO {
 	}
 
 	public static String getActiveWifiProfileName() {
-		String query = "SELECT wifi_name from WifiProfile WHERE active_profile = 1";
+		String query = "SELECT wifi_name from wifiprofile WHERE active_profile = 1";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query);
 				ResultSet rs = pstmt.executeQuery()) {
@@ -142,7 +142,7 @@ public class WifiProfileDAO {
 	}
 
 	public static String GetCurrentIpAddress() {
-		String query = "SELECT current_ip_address FROM WifiProfile where active_profile = 1";
+		String query = "SELECT current_ip_address FROM wifiprofile where active_profile = 1";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -165,7 +165,7 @@ public class WifiProfileDAO {
 	}
 
 	public static String GetCurrentCountry() {
-		String query = "SELECT original_location FROM WifiProfile where active_profile = 1";
+		String query = "SELECT original_location FROM wifiprofile where active_profile = 1";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -188,7 +188,7 @@ public class WifiProfileDAO {
 	}
 
 	public static int GetSearchStatus() {
-		String query = "SELECT search_status FROM WifiProfile WHERE wifi_profile_id = ?";
+		String query = "SELECT search_status FROM wifiprofile WHERE wifi_profile_id = ?";
 
 		int activeProfileId = getActiveWifiProfileId();
 
@@ -213,7 +213,7 @@ public class WifiProfileDAO {
 	}
 
 	public static void SetSearchStatus() {
-		String query = "UPDATE WifiProfile SET search_status =1 WHERE wifi_profile_id = ?";
+		String query = "UPDATE wifiprofile SET search_status =1 WHERE wifi_profile_id = ?";
 		int activeProfileId = getActiveWifiProfileId();
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -234,7 +234,7 @@ public class WifiProfileDAO {
 	}
 
 	public static void ResetSearchStatus() {
-		String query = "UPDATE WifiProfile SET search_status = 0 WHERE wifi_profile_id = ?";
+		String query = "UPDATE wifiprofile SET search_status = 0 WHERE wifi_profile_id = ?";
 		int activeProfileId = getActiveWifiProfileId();
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -254,27 +254,4 @@ public class WifiProfileDAO {
 		}
 	}
 
-	public static List<String> getUnknownOvpnPaths(int activeWifiProfileId) {
-		List<String> unknownOvpnPaths = new ArrayList<>();
-
-		String query = "SELECT ovpn_file_path FROM VPNConfig WHERE wifi_profile_id = ? AND (country = 'unknown' OR ip_address = 'unknown')";
-
-		try (Connection conn = DBConnection.getConnection();
-				PreparedStatement pstmt = conn.prepareStatement(query)) {
-
-			pstmt.setInt(1, activeWifiProfileId);
-			ResultSet rs = pstmt.executeQuery();
-
-			while (rs.next()) {
-				String unknownOvpn = rs.getString("ovpn_file_path");
-				unknownOvpnPaths.add(unknownOvpn);
-			}
-
-		} catch (SQLException e) {
-			System.err.println("Error adding Ovpns");
-			e.printStackTrace();
-		}
-
-		return unknownOvpnPaths;
-	}
 }

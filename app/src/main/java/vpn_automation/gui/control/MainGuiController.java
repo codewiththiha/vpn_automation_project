@@ -71,6 +71,9 @@ public class MainGuiController {
 	@FXML
 	private ComboBox<String> vpn_profile_combo_box;
 
+	@FXML
+	private Button recheck_button;
+
 	public void initialize() throws SQLException {
 
 		String currentDir = "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
@@ -99,6 +102,30 @@ public class MainGuiController {
 				}
 
 			}
+		});
+
+		recheck_button.setOnAction(event -> {
+			if (VPNConfigDAO.GetConnectedIpAddress() == null) {
+				if (backgroundTask != null && backgroundTask.isRunning()) {
+					VPNManager.disconnectVpn(this::UpdateConnectStatus);
+					VPNConfigDAO.SetVpnDisconnect();
+					backgroundTask.cancel();
+				}
+
+				backgroundTask = new Task<>() {
+					@Override
+					protected Void call() throws Exception {
+						RecheckAction();
+						return null;
+					}
+				};
+
+				Thread backgroundThread = new Thread(backgroundTask);
+				backgroundThread.setDaemon(true);
+				backgroundThread.start();
+			}
+			;
+
 		});
 
 		connect_button.setOnAction(event -> {
@@ -171,7 +198,7 @@ public class MainGuiController {
 					System.out.println("Background task stopped");
 
 					// TODO should show a pop up
-					VPNManager.disconnectVpn(this::UpdateConnectStatus);
+					VPNManager.disconnectVpn();
 					VPNConfigDAO.SetVpnDisconnect();
 					backgroundTask.cancel();
 				}
@@ -230,10 +257,10 @@ public class MainGuiController {
 		String encodedName = config_combo_box.getValue();
 		String OvpnPath = VPNConfigDAO.getOvpnConnection(activeWifiProfileId, encodedName);
 		VPNManager.connectVpn(OvpnPath, this::UpdateConnectStatus, this::UpdateCurrentLocation,
-				this::UpdateCurrentIpAddress, activeWifiProfileId, encodedName, this::UpdateConnectButton); // return
-																											// true
-																											// logic
-																											// failed
+				this::UpdateCurrentIpAddress, activeWifiProfileId, encodedName, this::UpdateConnectButton, this); // return
+		// true
+		// logic
+		// failed
 
 		// VPNConfigDAO.SetConnection(activeWifiProfileId, encodedName);
 
@@ -279,4 +306,9 @@ public class MainGuiController {
 		modifier.modifyOvpnFiles(currentDir, this::UpdateSearchStatus);
 		tester.testOvpnFiles(currentDir, this::UpdateSearchStatus, Limit);
 	}
+
+	public void RecheckAction() throws SQLException, Exception {
+		VPNManager.recheckTheOvpns(this, this::UpdateConnectStatus, this::UpdateConnectButton);
+	}
+
 }
