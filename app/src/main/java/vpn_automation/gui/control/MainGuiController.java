@@ -1,6 +1,7 @@
 package vpn_automation.gui.control;
 
 import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +24,9 @@ import vpn_automation.backend.VPNManager;
 import vpn_automation.backend.db.UserDAO;
 import vpn_automation.backend.db.VPNConfigDAO;
 import vpn_automation.backend.db.WifiProfileDAO;
+import javafx.scene.media.MediaView;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 public class MainGuiController {
 	private Task<Void> backgroundTask;
@@ -74,12 +78,17 @@ public class MainGuiController {
 	@FXML
 	private Button recheck_button;
 
-	public void initialize() throws SQLException {
+	@FXML
+	private MediaView media_view;
+	private MediaPlayer mediaPlayer;
+
+	public void initialize() throws Exception {
 
 		String currentDir = "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
+		RefreshMain();
 		Refresh();
 		Refresh2();
-
+		MediaPlayerTest(false);
 		try {
 			raw_ovpn_slider.setMax((double) FileUtils.getOvpnFiles(currentDir).size());
 		} catch (Exception e) {
@@ -94,12 +103,12 @@ public class MainGuiController {
 			if (newValue != null) {
 				System.out.println("User selected: " + newValue);
 				WifiProfileDAO.setSelectedWifiNameActive(newValue);
-				try {
-					Refresh();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				// try {
+				// Refresh();
+				// } catch (SQLException e) {
+				// // TODO Auto-generated catch block
+				// e.printStackTrace();
+				// }
 
 			}
 		});
@@ -136,8 +145,9 @@ public class MainGuiController {
 					VPNConfigDAO.SetVpnDisconnect();
 					backgroundTask.cancel();
 				}
-
+				MediaPlayerTest(true);
 				backgroundTask = new Task<>() {
+
 					@Override
 					protected Void call() throws Exception {
 						VPNConnect();
@@ -145,7 +155,8 @@ public class MainGuiController {
 					}
 				};
 
-				Thread backgroundThread = new Thread(backgroundTask);
+				Thread backgroundThread = new Thread(
+						backgroundTask);
 				backgroundThread.setDaemon(true);
 				backgroundThread.start();
 			}
@@ -156,6 +167,7 @@ public class MainGuiController {
 				try {
 					VPNManager.disconnectVpn(this::UpdateConnectStatus);
 					VPNConfigDAO.SetVpnDisconnect();
+					MediaPlayerTest(false);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -168,7 +180,8 @@ public class MainGuiController {
 		});
 
 		Platform.runLater(() -> {
-			Stage stage = (Stage) connect_button.getScene().getWindow();
+			Stage stage = (Stage) connect_button.getScene()
+					.getWindow();
 			stage.setOnCloseRequest(event -> {
 				System.out.println("Window is closing. Cleaning up...");
 				WifiProfileDAO.ResetSearchStatus();
@@ -194,6 +207,7 @@ public class MainGuiController {
 			if (WifiProfileDAO.GetSearchStatus() == 0) {
 				WifiProfileDAO.SetSearchStatus();
 				search_ovpn_button.setText("Cancel");
+				MediaPlayerTest(true);
 				if (backgroundTask != null && backgroundTask.isRunning()) {
 					System.out.println("Background task stopped");
 
@@ -218,6 +232,8 @@ public class MainGuiController {
 			else if (WifiProfileDAO.GetSearchStatus() == 1) {
 				WifiProfileDAO.ResetSearchStatus();
 				System.out.println("Stopped search");
+
+				MediaPlayerTest(false);
 				backgroundTask.cancel();
 				search_ovpn_button.setText("Search");
 				return;
@@ -226,6 +242,7 @@ public class MainGuiController {
 			backgroundTask.setOnSucceeded(e -> {
 				WifiProfileDAO.ResetSearchStatus();
 				search_ovpn_button.setText("Search");
+				MediaPlayerTest(false);
 			});
 
 		});
@@ -236,7 +253,7 @@ public class MainGuiController {
 		System.out.println("Here");
 		int userId = UserDAO.getActiveUserId();
 		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
-		VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId);
+
 		List<String> vpnCountries = VPNConfigDAO.getEncodedCountries(activeWifiProfileId);
 		List<String> wifiNames = WifiProfileDAO.getWifiNames(userId);
 		Collections.sort(wifiNames);
@@ -248,6 +265,11 @@ public class MainGuiController {
 		config_combo_box.setItems(observableVpnCountries);
 		active_wifi_profile_label.setText(WifiProfileDAO.getActiveWifiProfileName());
 
+	}
+
+	public void RefreshMain() {
+		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
+		VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId);
 	}
 
 	public void VPNConnect() throws IOException {
@@ -305,10 +327,40 @@ public class MainGuiController {
 
 		modifier.modifyOvpnFiles(currentDir, this::UpdateSearchStatus);
 		tester.testOvpnFiles(currentDir, this::UpdateSearchStatus, Limit);
+		OvpnFileTester.fixUnknownOvpns();
 	}
 
 	public void RecheckAction() throws SQLException, Exception {
 		VPNManager.recheckTheOvpns(this, this::UpdateConnectStatus, this::UpdateConnectButton);
 	}
 
+	public void MediaPlayerTest(boolean loadStatus) {
+		String countryCode = VPNConfigDAO.GetConnectedCountry();
+		String videoPath = null;
+
+		if (loadStatus) {
+			countryCode = "LOAD";
+
+		}
+		if (countryCode == null) {
+			countryCode = WifiProfileDAO.GetCurrentCountry();
+		}
+		if (countryCode != null) {
+			videoPath = CountryCodeConverter.getCountryVideo(countryCode);
+		}
+		URL resource = getClass().getResource(videoPath);
+		if (resource == null) {
+			System.out.println("Video file not found!");
+			return;
+		}
+
+		Media media = new Media(resource.toString());
+		mediaPlayer = new MediaPlayer(media);
+		media_view.setMediaPlayer(mediaPlayer);
+		if (loadStatus) {
+			mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+		}
+		// Start playing
+		mediaPlayer.play();
+	}
 }

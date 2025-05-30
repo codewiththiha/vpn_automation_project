@@ -7,6 +7,8 @@ public class CountryCodeConverter {
 
 	// Map of ISO 2-letter country codes to full country names
 	private static final Map<String, String> countryNameMap = new HashMap<>();
+	private static final Map<String, String> countryVideoMap = new HashMap<>();
+
 	private static final Map<String, Integer> COUNTER = new HashMap<>();
 	static {
 		countryNameMap.put("AF", "Afghanistan");
@@ -248,6 +250,14 @@ public class CountryCodeConverter {
 		countryNameMap.put("ZM", "Zambia");
 		countryNameMap.put("ZW", "Zimbabwe");
 		countryNameMap.put("UNKNOWN", "Unknown");
+		countryVideoMap.put("JP", "/assets/videos/japan.mp4");
+		countryVideoMap.put("RU", "/assets/videos/russia.mp4");
+		countryVideoMap.put("KR", "/assets/videos/south_korea.mp4");
+		countryVideoMap.put("MM", "/assets/videos/myanmar.mp4");
+		countryVideoMap.put("VN", "/assets/videos/vietnam.mp4");
+		countryVideoMap.put("TH", "/assets/videos/thailand.mp4");
+		countryVideoMap.put("US", "/assets/videos/united_states.mp4");
+		countryVideoMap.put("LOAD", "/assets/videos/loading_map.mp4");
 
 	}
 
@@ -288,5 +298,9 @@ public class CountryCodeConverter {
 	 */
 	public static void resetCounter() {
 		COUNTER.clear();
+	}
+
+	public static String getCountryVideo(String code) {
+		return countryVideoMap.get(code.toUpperCase());
 	}
 }

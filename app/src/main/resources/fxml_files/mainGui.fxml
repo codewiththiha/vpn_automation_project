@@ -11,16 +11,16 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.web.WebView?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="525.0" prefWidth="771.0" style="-fx-background-color: #333446;" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vpn_automation.gui.control.MainGuiController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="611.0" prefWidth="1087.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vpn_automation.gui.control.MainGuiController">
    <center>
-      <TabPane prefHeight="200.0" prefWidth="200.0" scaleShape="false" style="-fx-border-radius: 5;" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <TabPane prefHeight="611.0" prefWidth="311.0" scaleShape="false" style="-fx-border-radius: 5; -fx-background-color: black;" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
           <Tab text="MainInterFace">
                <content>
-                  <VBox alignment="TOP_CENTER" fillWidth="false" prefHeight="494.0" prefWidth="285.0" spacing="30.0">
+                  <VBox alignment="TOP_CENTER" fillWidth="false" prefHeight="580.0" prefWidth="283.0" spacing="30.0">
                      <children>
                         <ComboBox fx:id="vpn_profile_combo_box" prefHeight="40.0" prefWidth="200.0" promptText="VpnProfile">
                            <VBox.margin>
@@ -161,9 +161,6 @@
       </TabPane>
    </center>
    <right>
-      <WebView prefHeight="525.0" prefWidth="449.0" BorderPane.alignment="CENTER" />
+      <MediaView fx:id="media_view" fitHeight="610.0" fitWidth="800.0" BorderPane.alignment="CENTER" />
    </right>
-   <left>
-      <AnchorPane prefHeight="373.0" prefWidth="0.0" BorderPane.alignment="CENTER" />
-   </left>
 </BorderPane>

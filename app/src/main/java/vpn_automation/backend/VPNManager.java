@@ -26,7 +26,7 @@ public class VPNManager {
 			Consumer<String> ConnectButtonGui,
 			MainGuiController guiController) throws IOException {
 		if (ovpnPath == null || ovpnPath.isEmpty()) {
-			ConnectStatusGui.accept("Error: OVPN file path is empty.");
+			ConnectStatusGui.accept("Please Choose one");
 			return;
 		}
 
@@ -49,6 +49,7 @@ public class VPNManager {
 						if (!connected && line.contains("Initialization Sequence Completed")) {
 							ConnectStatusGui.accept("Connected");
 							VPNConfigDAO.SetConnection(activeWifiProfileId, encodedName);
+							guiController.MediaPlayerTest(false);
 							LocationStatusGui.accept("Current Location: " + CountryCodeConverter.getCountryName(
 									VPNConfigDAO.GetConnectedCountry()));
 							IpStatusGui.accept("Ip: " + VPNConfigDAO.GetConnectedIpAddress());
@@ -130,7 +131,7 @@ public class VPNManager {
 				} catch (InterruptedException e) {
 					ConnectButtonGui.accept("Connect");
 					disconnectVpn(ConnectStatusGui);
-					ConnectStatusGui.accept("Connection interrupted.");
+					ConnectStatusGui.accept("Disconnected");
 					Thread.currentThread().interrupt();
 					break;
 				}
@@ -234,10 +235,19 @@ public class VPNManager {
 
 			if (!OvpnFileTester.testOvpnFileReCheck(ovpnPath)) {
 				VPNConfigDAO.DeleteUnresponsiveOvpn(activeWifiProfileId, ovpnPath);
-				VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId);
+				VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId, guiController);
 				// VPNManager.disconnectVpn();
-				guiController.Refresh();
+				// guiController.Refresh();
+				Platform.runLater(() -> {
+					try {
+						guiController.Refresh();
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				});
 			}
+			VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId);
 
 		}
 		ConnectStatusGui.accept("Recheck completed");

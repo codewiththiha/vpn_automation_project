@@ -260,12 +260,19 @@ public class OvpnFileTester {
 
 	// should add at the end of each tested conditions
 	public static void fixUnknownOvpns() throws SQLException, Exception {
-		int activeWifiProfileId = 10;
+		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
 		System.out.println(activeWifiProfileId);
 		while (true) {
 			List<String> files = VPNConfigDAO.getUnknownOvpnPaths(activeWifiProfileId);
-			System.out.println(files.size());
+			System.out.println("Size: " + files.size());
+			if (files.size() == 0) {
+				System.out.println("Quitting");
+				// VPNManager.disconnectVpn();
+
+				break;
+			}
 			for (String file : files) {
+				System.out.println("Here0009");
 				if (testOvpnFileForDebug(file)) {
 
 					System.out.println("Success " + file);
@@ -276,10 +283,6 @@ public class OvpnFileTester {
 				}
 			}
 
-			if (files.size() == 0) {
-				VPNManager.disconnectVpn();
-				break;
-			}
 		}
 
 	}

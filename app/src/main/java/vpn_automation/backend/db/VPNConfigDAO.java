@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import vpn_automation.backend.CountryCodeConverter;
+import vpn_automation.gui.control.MainGuiController;
 
 import java.time.LocalDateTime;
 
@@ -454,6 +455,19 @@ public class VPNConfigDAO {
 		}
 
 		return ovpnPaths;
+	}
+
+	public static void refreshAndGenerateEncodedCountries(int wifiProfileId, MainGuiController guiController)
+			throws SQLException {
+		List<String> countryCodes = getCountries(wifiProfileId);
+		CountryCodeConverter.resetCounter();
+		replaceWithNULLToEncoded(wifiProfileId);
+
+		for (String countryCode : countryCodes) {
+			String Encodedcountry = CountryCodeConverter.counter(countryCode);
+			setEncodedCountries(Encodedcountry, countryCode.toUpperCase(), wifiProfileId);
+		}
+		guiController.Refresh();
 	}
 
 }
