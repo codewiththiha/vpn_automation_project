@@ -63,7 +63,8 @@ tasks.register<JavaExec>("runGui") {
     group = "application"
     description = "Runs the JavaFX Gui application"
     // mainClass.set("vpn_automation.gui.Main2")
-	mainClass.set("vpn_automation.gui.RESMain")
+	// mainClass.set("vpn_automation.gui.RESMain")
+	mainClass.set("vpn_automation.PopUp")
     classpath = sourceSets.main.get().runtimeClasspath
     jvmArgs = listOf(
         "--module-path", classpath.asPath,

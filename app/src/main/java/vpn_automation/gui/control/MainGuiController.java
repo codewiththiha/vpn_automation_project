@@ -89,6 +89,7 @@ public class MainGuiController {
 		Refresh();
 		Refresh2();
 		MediaPlayerTest(false);
+		OvpnFileTester.fixUnknownOvpns();
 		try {
 			raw_ovpn_slider.setMax((double) FileUtils.getOvpnFiles(currentDir).size());
 		} catch (Exception e) {
@@ -106,7 +107,7 @@ public class MainGuiController {
 				// try {
 				// Refresh();
 				// } catch (SQLException e) {
-				// // TODO Auto-generated catch block
+				// TODO Auto-generated catch block
 				// e.printStackTrace();
 				// }
 
@@ -114,36 +115,73 @@ public class MainGuiController {
 		});
 
 		recheck_button.setOnAction(event -> {
+
+			System.out.println("Current Recheck Status: " + WifiProfileDAO.GetSearchStatus());
 			if (VPNConfigDAO.GetConnectedIpAddress() == null) {
-				if (backgroundTask != null && backgroundTask.isRunning()) {
-					VPNManager.disconnectVpn(this::UpdateConnectStatus);
-					VPNConfigDAO.SetVpnDisconnect();
-					backgroundTask.cancel();
+
+				if (WifiProfileDAO.GetSearchStatus() == 1) {
+					ErrorDialog dialog = new ErrorDialog();
+					dialog.setErrorMessage("You are Currently On search");
+					dialog.show();
 				}
 
-				backgroundTask = new Task<>() {
-					@Override
-					protected Void call() throws Exception {
-						RecheckAction();
-						return null;
-					}
-				};
+				else if (WifiProfileDAO.GetSearchStatus() == 0) {
+					// set status
+					System.out.println(WifiProfileDAO.GetSearchStatus());
+					System.out.println("In the Recheck session");
+					WifiProfileDAO.SetRecheckStatus();
+					recheck_button.setText("Cancel");
+					backgroundTask = new Task<>() {
+						@Override
+						protected Void call() throws Exception {
+							RecheckAction();
+							return null;
+						}
+					};
 
-				Thread backgroundThread = new Thread(backgroundTask);
-				backgroundThread.setDaemon(true);
-				backgroundThread.start();
+					Thread backgroundThread = new Thread(backgroundTask);
+					backgroundThread.setDaemon(true);
+					backgroundThread.start();
+				}
+
+				else if (WifiProfileDAO.GetSearchStatus() == 2) {
+					backgroundTask.cancel();
+					WifiProfileDAO.ResetSearchStatus(); // reapply 0
+					connect_status_label.setText("Recheck Cancelled now");
+					recheck_button.setText("Recheck");
+					System.out.println("Recheck canceled now");
+					OvpnFileTester.cancelOvpnProcess();
+					MediaPlayerTest(false);
+
+				}
+
 			}
-			;
+			// check if vpn is connected or not
+			// todo add warning
+			else {
+				if (backgroundTask != null && backgroundTask.isRunning()) {
+					backgroundTask.cancel();
+					VPNManager.disconnectVpn(this::UpdateConnectStatus);
+					VPNConfigDAO.SetVpnDisconnect();
+					ErrorDialog dialog = new ErrorDialog();
+					dialog.setErrorMessage("Connected to a Vpn currently");
+					dialog.show();
+				}
+			}
 
 		});
 
-		connect_button.setOnAction(event -> {
+		connect_button.setOnAction(event ->
 
+		{
+			System.out.println("Here_____________" + VPNConfigDAO.GetConnectedIpAddress());
 			if (VPNConfigDAO.GetConnectedIpAddress() == null) {
+				System.out.println("Here0008");
 				if (backgroundTask != null && backgroundTask.isRunning()) {
 					VPNManager.disconnectVpn(this::UpdateConnectStatus);
 					VPNConfigDAO.SetVpnDisconnect();
 					backgroundTask.cancel();
+					return;
 				}
 				MediaPlayerTest(true);
 				backgroundTask = new Task<>() {
@@ -160,20 +198,25 @@ public class MainGuiController {
 				backgroundThread.setDaemon(true);
 				backgroundThread.start();
 			}
-			;
-			if (!(VPNConfigDAO.GetConnectedIpAddress() == null)) {
-				Refresh2();
+
+			else if (!(VPNConfigDAO.GetConnectedIpAddress() == null)) {
+				System.out.println("Here0075");
 				connect_button.setText("Connect");
-				try {
-					VPNManager.disconnectVpn(this::UpdateConnectStatus);
-					VPNConfigDAO.SetVpnDisconnect();
-					MediaPlayerTest(false);
-				} catch (Exception e) {
-					e.printStackTrace();
+
+				// Cancel background task first
+				if (backgroundTask != null) {
+					backgroundTask.cancel(true); // true = interrupt thread
 				}
 
-				if (backgroundTask != null && backgroundTask.isRunning()) {
-					backgroundTask.cancel();
+				try {
+					VPNManager.disconnectVpn();
+					VPNConfigDAO.SetVpnDisconnect();
+					MediaPlayerTest(false);
+					connect_status_label.setText("Disconnected");
+					Refresh();
+					Refresh2();
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 			;
@@ -187,11 +230,10 @@ public class MainGuiController {
 				WifiProfileDAO.ResetSearchStatus();
 				try {
 					VPNManager.disconnectVpn(this::UpdateConnectStatus);
-					VPNConfigDAO.SetVpnDisconnect();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-
+				VPNConfigDAO.SetVpnDisconnect();
 				if (backgroundTask != null && backgroundTask.isRunning()) {
 					backgroundTask.cancel();
 				}
@@ -215,6 +257,7 @@ public class MainGuiController {
 					VPNManager.disconnectVpn();
 					VPNConfigDAO.SetVpnDisconnect();
 					backgroundTask.cancel();
+					return;
 				}
 
 				backgroundTask = new Task<>() {
@@ -263,6 +306,7 @@ public class MainGuiController {
 		vpn_profile_combo_box.setItems(observableWifiNames);
 		vpn_profile_combo_box.setValue(WifiProfileDAO.getActiveWifiProfileName());
 		config_combo_box.setItems(observableVpnCountries);
+		vpn_profile_combo_box.getItems().add("Add new profile");
 		active_wifi_profile_label.setText(WifiProfileDAO.getActiveWifiProfileName());
 
 	}
@@ -273,8 +317,8 @@ public class MainGuiController {
 	}
 
 	public void VPNConnect() throws IOException {
-		VPNManager.disconnectVpn(this::UpdateConnectStatus);
-		VPNConfigDAO.SetVpnDisconnect();
+		// VPNManager.disconnectVpn(this::UpdateConnectStatus);
+		// VPNConfigDAO.SetVpnDisconnect();
 		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
 		String encodedName = config_combo_box.getValue();
 		String OvpnPath = VPNConfigDAO.getOvpnConnection(activeWifiProfileId, encodedName);
@@ -326,7 +370,7 @@ public class MainGuiController {
 		OvpnFileTester tester = new OvpnFileTester();
 
 		modifier.modifyOvpnFiles(currentDir, this::UpdateSearchStatus);
-		tester.testOvpnFiles(currentDir, this::UpdateSearchStatus, Limit);
+		tester.testOvpnFiles(currentDir, this::UpdateSearchStatus, Limit, this);
 		OvpnFileTester.fixUnknownOvpns();
 	}
 

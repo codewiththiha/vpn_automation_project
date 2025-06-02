@@ -1,0 +1,5 @@
+.label {
+	-fx-max-width: Infinity; /* stretch to fill available space */
+	-fx-alignment: center; /* center both text and content */
+	-fx-text-alignment: center; /* ensure text is centered */
+}

@@ -81,7 +81,7 @@ public class WifiProfileDAO {
 	}
 
 	public static int getActiveWifiProfileId() {
-		String query = "SELECT wifi_profile_id FROM wifiprofile WHERE active_profile =1;";
+		String query = "SELECT wifi_profile_id FROM wifiprofile WHERE active_profile = 1";
 
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query);
@@ -224,6 +224,27 @@ public class WifiProfileDAO {
 
 			if (rowsUpdated > 0) {
 				System.out.println("Search Status set to 1");
+			} else {
+				System.out.println("Failed");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void SetRecheckStatus() {
+		String query = "UPDATE wifiprofile SET search_status =2 WHERE wifi_profile_id = ?";
+		int activeProfileId = getActiveWifiProfileId();
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeProfileId);
+			// Execute the update
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Search Status set to 2");
 			} else {
 				System.out.println("Failed");
 			}

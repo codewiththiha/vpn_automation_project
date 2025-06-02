@@ -1,0 +1,54 @@
+.combo-box {
+	-fx-background-color: #ffffff;
+	-fx-border-color: #cccccc;
+	-fx-border-radius: 8px;
+	-fx-background-radius: 8px;
+	-fx-padding: 10px;
+	-fx-font-size: 14px;
+	-fx-font-weight: normal;
+	-fx-text-fill: #333333;
+}
+
+/* Change border color on hover */
+.combo-box:hover {
+	-fx-border-color: #888888;
+	-fx-font-weight: bold;
+}
+
+/* When focused */
+.combo-box:focused {
+	-fx-border-color: #0078d7;
+	-fx-background-radius: 8px;
+}
+
+/* Customize the arrow button */
+.combo-box .arrow-button {
+	-fx-background-color: transparent;
+}
+
+/* Customize the arrow shape */
+.combo-box .arrow {
+	-fx-background-color: #333333;
+	-fx-shape: "M 0 0 L 4 4 L 8 0 Z"; /* Triangle */
+}
+
+/* Dropdown popup menu */
+.combo-box-popup > .content-menu-pane {
+	-fx-background-color: #f0f0f0;
+	-fx-border-color: #cccccc;
+	-fx-border-radius: 6px;
+	-fx-padding: 5px;
+}
+
+/* Menu items in the dropdown */
+.combo-box-popup > .content-menu-pane .menu-item {
+	-fx-background-color: transparent;
+	-fx-text-fill: #333333;
+	-fx-padding: 8px 12px;
+}
+
+/* Hover effect for menu items */
+.combo-box-popup > .content-menu-pane .menu-item:hover {
+	-fx-background-color: #e0e0e0;
+	-fx-font-weight: bold;
+}

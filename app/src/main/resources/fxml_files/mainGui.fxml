@@ -16,39 +16,39 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="611.0" prefWidth="1087.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vpn_automation.gui.control.MainGuiController">
    <center>
-      <TabPane prefHeight="611.0" prefWidth="311.0" scaleShape="false" style="-fx-border-radius: 5; -fx-background-color: black;" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+      <TabPane prefHeight="611.0" prefWidth="311.0" scaleShape="false" style="-fx-border-radius: 0; -fx-background-color: black; -fx-border-color: white; -fx-border-width: 7;" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
           <Tab text="MainInterFace">
                <content>
                   <VBox alignment="TOP_CENTER" fillWidth="false" prefHeight="580.0" prefWidth="283.0" spacing="30.0">
                      <children>
-                        <ComboBox fx:id="vpn_profile_combo_box" prefHeight="40.0" prefWidth="200.0" promptText="VpnProfile">
+                        <ComboBox fx:id="vpn_profile_combo_box" prefHeight="40.0" prefWidth="200.0" promptText="VpnProfile" stylesheets="@../style_sheets/combo_box.css">
                            <VBox.margin>
                               <Insets />
                            </VBox.margin>
                         </ComboBox>
-                        <ComboBox fx:id="config_combo_box" prefHeight="40.0" prefWidth="200.0" promptText="Vpn" />
-                        <Button fx:id="connect_button" minHeight="40.0" mnemonicParsing="false" text="Connect" />
-                        <AnchorPane prefHeight="198.0" prefWidth="200.0">
+                        <ComboBox fx:id="config_combo_box" prefHeight="40.0" prefWidth="200.0" promptText="Vpn" stylesheets="@../style_sheets/combo_box.css" />
+                        <Button fx:id="connect_button" mnemonicParsing="false" stylesheets="@../style_sheets/button.css" text="Connect" />
+                        <AnchorPane fx:id="status_group" prefHeight="198.0" prefWidth="248.0" stylesheets="@../style_sheets/center.css">
                            <children>
-                              <Label fx:id="current_location_label" layoutX="5.0" layoutY="50.0" text="Current Location: Myanmar" textAlignment="CENTER" textFill="WHITE">
+                              <Label fx:id="current_location_label" layoutY="50.0" prefHeight="20.0" prefWidth="248.0" text="Current Location: Myanmar" textAlignment="CENTER" textFill="WHITE">
                                  <font>
                                     <Font name="JetBrains Mono Bold" size="14.0" />
                                  </font>
                               </Label>
-                              <Label fx:id="current_ip_label" layoutX="5.0" layoutY="88.0" text="ip:" textAlignment="CENTER" textFill="WHITE">
+                              <Label id="ip_status" fx:id="current_ip_label" layoutX="-2.0" layoutY="88.0" prefHeight="20.0" prefWidth="250.0" text="ip:" textAlignment="CENTER" textFill="WHITE">
                                  <font>
                                     <Font name="JetBrains Mono Bold" size="14.0" />
                                  </font>
                               </Label>
-                              <Label fx:id="connect_status_label" layoutX="65.0" layoutY="14.0" text="Connected" textAlignment="CENTER" textFill="WHITE">
+                              <Label fx:id="connect_status_label" layoutX="-1.0" layoutY="14.0" prefHeight="20.0" prefWidth="249.0" text="Connected" textAlignment="CENTER" textFill="WHITE">
                                  <font>
                                     <Font name="JetBrains Mono Bold" size="14.0" />
                                  </font>
                               </Label>
                            </children>
                         </AnchorPane>
-                        <Button fx:id="recheck_button" mnemonicParsing="false" text="Recheck" />
+                        <Button fx:id="recheck_button" mnemonicParsing="false" stylesheets="@../style_sheets/button.css" text="Recheck" />
                      </children>
                      <opaqueInsets>
                         <Insets />
@@ -161,6 +161,6 @@
       </TabPane>
    </center>
    <right>
-      <MediaView fx:id="media_view" fitHeight="610.0" fitWidth="800.0" BorderPane.alignment="CENTER" />
+      <MediaView fx:id="media_view" fitHeight="615.0" fitWidth="800.0" BorderPane.alignment="CENTER" />
    </right>
 </BorderPane>

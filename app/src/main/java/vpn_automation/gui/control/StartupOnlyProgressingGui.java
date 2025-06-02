@@ -15,6 +15,7 @@ import javafx.util.Duration;
 import vpn_automation.backend.FileUtils;
 import vpn_automation.backend.OvpnFileModifier;
 import vpn_automation.backend.OvpnFileTester;
+import vpn_automation.backend.db.WifiProfileDAO;
 
 public class StartupOnlyProgressingGui {
 
@@ -47,6 +48,7 @@ public class StartupOnlyProgressingGui {
 				OvpnFileModifier modifier = new OvpnFileModifier();
 				OvpnFileTester tester = new OvpnFileTester();
 				modifier.modifyOvpnFiles(currentDir, StartupOnlyProgressingGui.this::updateGuiMessage);
+				WifiProfileDAO.SetSearchStatus();
 				tester.testOvpnFiles(currentDir, StartupOnlyProgressingGui.this::updateGuiMessage, limit);
 
 				return null;

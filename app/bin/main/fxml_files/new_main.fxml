@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.media.MediaView?>
+<?import javafx.scene.text.Font?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="611.0" prefWidth="1087.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vpn_automation.gui.control.MainGuiController">
+	<center>
+		<TabPane prefHeight="584.0" prefWidth="308.0" scaleShape="false" style="-fx-border-color: white; -fx-border-width: 5;" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+			<tabs>
+				<Tab text="MainInterFace">
+					<content>
+						<VBox alignment="TOP_CENTER" fillWidth="false" prefHeight="580.0" prefWidth="283.0" spacing="30.0">
+							<children>
+								<ComboBox fx:id="vpn_profile_combo_box" prefHeight="40.0" prefWidth="200.0" promptText="VpnProfile" style="-fx-background-color: white;">
+									<VBox.margin>
+										<Insets />
+									</VBox.margin>
+								</ComboBox>
+								<ComboBox fx:id="config_combo_box" prefHeight="40.0" prefWidth="200.0" promptText="Vpn" style="-fx-background-color: white;" />
+								<Button fx:id="connect_button" minHeight="40.0" mnemonicParsing="false" style="-fx-background-color: white;" text="Connect" />
+								<AnchorPane prefHeight="198.0" prefWidth="200.0">
+									<children>
+										<Label fx:id="current_location_label" layoutX="-1.0" layoutY="50.0" prefHeight="20.0" prefWidth="222.0" text="Current Location: Myanmar" textAlignment="CENTER" textFill="WHITE">
+											<font>
+												<Font name="JetBrains Mono Bold" size="14.0" />
+											</font>
+										</Label>
+										<Label fx:id="current_ip_label" layoutX="-1.0" layoutY="88.0" prefHeight="20.0" prefWidth="231.0" text="ip:" textAlignment="CENTER" textFill="WHITE">
+											<font>
+												<Font name="JetBrains Mono Bold" size="14.0" />
+											</font>
+										</Label>
+										<Label fx:id="connect_status_label" layoutY="14.0" prefHeight="20.0" prefWidth="217.0" text="Connected" textAlignment="CENTER" textFill="WHITE">
+											<font>
+												<Font name="JetBrains Mono Bold" size="14.0" />
+											</font>
+										</Label>
+									</children>
+								</AnchorPane>
+								<Button fx:id="recheck_button" mnemonicParsing="false" style="-fx-background-color: white;" text="Recheck" />
+							</children>
+							<opaqueInsets>
+								<Insets />
+							</opaqueInsets>
+							<padding>
+								<Insets top="40.0" />
+							</padding>
+						</VBox>
+					</content>
+				</Tab>
+				<Tab text="Search">
+					<content>
+						<VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" spacing="2.0">
+							<children>
+								<Label fx:id="active_wifi_profile_label" text="WiFiProfile" textFill="WHITE">
+									<font>
+										<Font name="JetBrains Mono Regular" size="13.0" />
+									</font>
+									<opaqueInsets>
+										<Insets />
+									</opaqueInsets>
+									<VBox.margin>
+										<Insets top="20.0" />
+									</VBox.margin>
+								</Label>
+								<Label fx:id="raw_ovpn_amount_label" text="0" textFill="WHITE">
+									<font>
+										<Font size="20.0" />
+									</font>
+									<VBox.margin>
+										<Insets top="10.0" />
+									</VBox.margin>
+								</Label>
+								<Slider fx:id="raw_ovpn_slider" prefHeight="16.0" prefWidth="73.0">
+									<VBox.margin>
+										<Insets left="40.0" right="30.0" />
+									</VBox.margin>
+								</Slider>
+								<Label text="Limit Vpn Config Amount" textFill="WHITE">
+									<font>
+										<Font name="JetBrains Mono Regular" size="13.0" />
+									</font>
+									<VBox.margin>
+										<Insets top="5.0" />
+									</VBox.margin>
+								</Label>
+								<Button fx:id="search_ovpn_button" mnemonicParsing="false" text="Search">
+									<VBox.margin>
+										<Insets top="20.0" />
+									</VBox.margin>
+								</Button>
+								<AnchorPane prefHeight="200.0" prefWidth="200.0">
+									<children>
+										<Label fx:id="main_status_label" layoutX="35.0" layoutY="36.0" maxHeight="132.0" maxWidth="164.0" prefHeight="132.0" prefWidth="164.0" text="status" textFill="WHITE" wrapText="true">
+											<font>
+												<Font name="JetBrains Mono Regular" size="13.0" />
+											</font>
+										</Label>
+									</children>
+								</AnchorPane>
+							</children>
+						</VBox>
+					</content>
+				</Tab>
+				<Tab text="User">
+					<content>
+						<VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0">
+							<children>
+								<Label fx:id="logged_in_user_label" text="Hello User!" textFill="WHITE">
+									<font>
+										<Font name="JetBrains Mono Bold" size="15.0" />
+									</font>
+									<VBox.margin>
+										<Insets top="15.0" />
+									</VBox.margin>
+								</Label>
+								<HBox alignment="TOP_CENTER" prefHeight="29.0" prefWidth="100.0" spacing="20.0">
+									<children>
+										<Button fx:id="edit_user_name_button" mnemonicParsing="false" prefHeight="30.0" prefWidth="100.0" text="EditUserName" textAlignment="CENTER">
+											<HBox.margin>
+												<Insets />
+											</HBox.margin>
+											<font>
+												<Font name="System Bold" size="10.0" />
+											</font>
+										</Button>
+										<Button fx:id="change_password_button" mnemonicParsing="false" prefHeight="30.0" prefWidth="100.0" text="ChangePassword">
+											<HBox.margin>
+												<Insets />
+											</HBox.margin>
+											<font>
+												<Font name="System Bold" size="10.0" />
+											</font>
+										</Button>
+									</children>
+									<VBox.margin>
+										<Insets top="15.0" />
+									</VBox.margin>
+								</HBox>
+								<Button fx:id="log_out_button" mnemonicParsing="false" text="Log Out">
+									<VBox.margin>
+										<Insets top="370.0" />
+									</VBox.margin>
+								</Button>
+							</children>
+						</VBox>
+					</content>
+				</Tab>
+			</tabs>
+		</TabPane>
+	</center>
+	<right>
+		<MediaView fx:id="media_view" fitHeight="610.0" fitWidth="800.0" BorderPane.alignment="CENTER" />
+	</right>
+	<top>
+		<MenuBar prefHeight="0.0" prefWidth="1087.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
+			<menus>
+				<Menu mnemonicParsing="false" text="Options">
+					<items>
+						<MenuItem mnemonicParsing="false" text="Search Ovpns" />
+						<RadioMenuItem mnemonicParsing="false" text="Always Connect" />
+					</items>
+				</Menu>
+				<Menu mnemonicParsing="false" text="Help">
+					<items>
+						<MenuItem mnemonicParsing="false" text="About" />
+					</items>
+				</Menu>
+			</menus>
+		</MenuBar>
+	</top>
+</BorderPane>
