@@ -101,25 +101,30 @@ public class WifiProfileDAO {
 	}
 
 	public static void setSelectedWifiNameActive(String wifiName) {
-		String deactivateQuery = "UPDATE wifiprofile SET active_profile = 0";
-		String activateQuery = "UPDATE wifiprofile SET active_profile = 1 WHERE wifi_name = ?";
+		if (!wifiName.equals(null)) {
+			String deactivateQuery = "UPDATE wifiprofile SET active_profile = 0";
+			String activateQuery = "UPDATE wifiprofile SET active_profile = 1 WHERE wifi_name = ?";
 
-		try (Connection conn = DBConnection.getConnection()) {
-			// Deactivate all profiles first
-			try (PreparedStatement pstmt1 = conn.prepareStatement(deactivateQuery)) {
-				pstmt1.executeUpdate();
+			try (Connection conn = DBConnection.getConnection()) {
+				// Deactivate all profiles first
+				try (PreparedStatement pstmt1 = conn.prepareStatement(deactivateQuery)) {
+					pstmt1.executeUpdate();
+				}
+
+				// Activate only the selected profile
+				try (PreparedStatement pstmt2 = conn.prepareStatement(activateQuery)) {
+					pstmt2.setString(1, wifiName);
+					pstmt2.executeUpdate();
+				}
+
+			} catch (SQLException e) {
+				System.err.println("Error updating active_profile:");
+				e.printStackTrace();
 			}
-
-			// Activate only the selected profile
-			try (PreparedStatement pstmt2 = conn.prepareStatement(activateQuery)) {
-				pstmt2.setString(1, wifiName);
-				pstmt2.executeUpdate();
-			}
-
-		} catch (SQLException e) {
-			System.err.println("Error updating active_profile:");
-			e.printStackTrace();
+		} else {
+			System.out.println("Your wifi is deleted");
 		}
+
 	}
 
 	public static String getActiveWifiProfileName() {

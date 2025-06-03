@@ -114,7 +114,7 @@ public class OvpnFileTester {
 						workingFiles.add(file.toString());
 						guiUpdater.accept("Success: " + file.getFileName() + " connected successfully");
 						guiController.RefreshMain();
-						guiController.Refresh();
+						guiController.RefreshVpns();
 					} else {
 						guiUpdater.accept("Failed: " + file.getFileName());
 					}
@@ -171,7 +171,7 @@ public class OvpnFileTester {
 						}
 					}
 				}
-
+				// TODO can add detect error method
 				if (System.currentTimeMillis() - startTime >= TIMEOUT_SECONDS * 1000) {
 					guiUpdater.accept(
 							"Timeout: " + file.getFileName() + " failed within " + TIMEOUT_SECONDS + " seconds");
@@ -285,22 +285,22 @@ public class OvpnFileTester {
 
 				if (line.contains("Initialization Sequence Completed")) {
 					System.out.println("Adding");
-					IPInfoFetcher.clearCache();
 
 					return 1;
-				}
-
-				for (String errorKeyword : VPNManager.errorKeywords) {
-					if (line.contains(errorKeyword)) {
-						System.out.println("Error detected: " + errorKeyword);
-						return -1;
-					}
 				}
 
 				if (System.currentTimeMillis() - startTime >= 25 * 1000) {
 					System.out.println("Timeout reached.");
 					return 0;
 				}
+
+				for (String errorKeyword : VPNManager.errorKeywords) {
+					if (line.contains(errorKeyword)) {
+						System.out.println("Error detected: " + errorKeyword);
+						return 0;
+					}
+				}
+
 			}
 
 			return 0;
@@ -334,6 +334,7 @@ public class OvpnFileTester {
 			}
 			currentOvpnProcess = null;
 		}
+
 	}
 
 	// should add at the end of each tested conditions

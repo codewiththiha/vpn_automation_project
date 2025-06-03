@@ -2,6 +2,7 @@ package vpn_automation.gui.control;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,8 +32,7 @@ public class NewProfile {
 	public NewProfile() {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml_files/new_profile.fxml"));
-			loader.setController(this); // explicitly set controller (useful when loader itself is controller)
-
+			loader.setController(this); // Set the controller for the FXML
 			Scene scene = new Scene(loader.load());
 			dialogStage = new Stage();
 			dialogStage.setScene(scene);
@@ -43,10 +43,11 @@ public class NewProfile {
 		}
 	}
 
-	public void initialize() {
+	public void initialize(MainGuiController guiController) {
 		submit_button.setOnAction(event -> {
 			try {
-				WifiProfileCreator();
+				System.out.println("Submit button clicked");
+				WifiProfileCreator(guiController);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -55,27 +56,33 @@ public class NewProfile {
 		});
 	}
 
-	public void WifiProfileCreator() throws Exception {
+	public void WifiProfileCreator(MainGuiController guiController) throws Exception {
 		ErrorDialog dialog = new ErrorDialog();
 		String wifiBrand = brand_name_field.getText();
 		String wifiName = wifi_name_field.getText();
 		int userID = UserDAO.getActiveUserId();
 		String currentIPAddress = IPInfoFetcher.getIPAddress();
 		String currentLocation = IPInfoFetcher.getCountry();
-		if (wifiBrand.isEmpty() || wifiBrand.isEmpty()) {
+		List<String> wifiNames = WifiProfileDAO.getWifiNames(UserDAO.getActiveUserId());
+		if (wifiNames.contains(wifiName)) {
+			dialog.setErrorMessage("Wifi Name Duplicated!");
+			dialog.show();
+		} else if (wifiBrand.isEmpty() || wifiName.isEmpty()) {
+			System.out.println("Now showing error dialog");
 			dialog.setErrorMessage("Please fill the Fields first");
 			dialog.show();
 		} else {
+			System.out.println("Here we go");
 			WifiProfileDAO.makeWifiProfileForLoggedInUser(userID, wifiBrand.toLowerCase(), currentIPAddress,
 					currentLocation,
 					wifiName);
-			onCloseButtonClick(null);
+			guiController.Refresh();
+			dialogStage.close();
 		}
 	}
 
 	@FXML
-	private void onCloseButtonClick(MainGuiController guiController) throws SQLException {
-		guiController.Refresh();
+	private void onCloseButtonClick() throws SQLException {
 		dialogStage.close();
 	}
 
@@ -89,6 +96,14 @@ public class NewProfile {
 	public void show() {
 		if (dialogStage != null)
 			dialogStage.show();
+	}
+
+	public static void RefreshMainGui(MainGuiController guiController) throws SQLException {
+		guiController.Refresh();
+	}
+
+	public Stage getStatus() {
+		return dialogStage;
 	}
 
 }

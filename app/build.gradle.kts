@@ -39,6 +39,10 @@ dependencies {
 
 	// Json
 	implementation("org.json:json:20250107")
+
+	// might fix connection closed errors
+	implementation("com.zaxxer:HikariCP:5.0.1")
+	implementation("org.slf4j:slf4j-simple:2.0.9")
 	
 }
 
@@ -63,8 +67,8 @@ tasks.register<JavaExec>("runGui") {
     group = "application"
     description = "Runs the JavaFX Gui application"
     // mainClass.set("vpn_automation.gui.Main2")
-	// mainClass.set("vpn_automation.gui.RESMain")
-	mainClass.set("vpn_automation.PopUp")
+	mainClass.set("vpn_automation.gui.RESMain")
+	// mainClass.set("vpn_automation.PopUp")
     classpath = sourceSets.main.get().runtimeClasspath
     jvmArgs = listOf(
         "--module-path", classpath.asPath,

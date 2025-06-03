@@ -84,10 +84,13 @@ public class MainGuiController {
 
 	public void initialize() throws Exception {
 
-		String currentDir = "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
 		RefreshMain();
 		Refresh();
 		Refresh2();
+		RefreshVpns();
+
+		String currentDir = "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
+
 		MediaPlayerTest(false);
 		OvpnFileTester.fixUnknownOvpns();
 		try {
@@ -103,11 +106,19 @@ public class MainGuiController {
 		vpn_profile_combo_box.valueProperty().addListener((obs, oldValue, newValue) -> {
 			if (newValue != null) {
 				System.out.println("User selected: " + newValue);
-				WifiProfileDAO.setSelectedWifiNameActive(newValue);
+				if (newValue.equals("Add new profile")) {
+					NewProfile dialog = new NewProfile();
+					dialog.initialize(this);
+					dialog.show();
+				} else {
+					WifiProfileDAO.setSelectedWifiNameActive(newValue);
+					RefreshVpns(); // todo check errors
+				}
+
 				// try {
 				// Refresh();
 				// } catch (SQLException e) {
-				// TODO Auto-generated catch block
+				// todo Auto-generated catch block
 				// e.printStackTrace();
 				// }
 
@@ -115,22 +126,50 @@ public class MainGuiController {
 		});
 
 		recheck_button.setOnAction(event -> {
-
+			WarningDialog warning_dialog = new WarningDialog();
 			System.out.println("Current Recheck Status: " + WifiProfileDAO.GetSearchStatus());
-			if (VPNConfigDAO.GetConnectedIpAddress() == null) {
+			// System.out.println(warning_dialog.showAndGetResult());
 
-				if (WifiProfileDAO.GetSearchStatus() == 1) {
-					ErrorDialog dialog = new ErrorDialog();
-					dialog.setErrorMessage("You are Currently On search");
-					dialog.show();
-				}
+			if (WifiProfileDAO.GetSearchStatus() == 1) {
+				ErrorDialog dialog = new ErrorDialog();
+				dialog.setErrorMessage("You are Currently On search");
+				dialog.show();
+			}
 
-				else if (WifiProfileDAO.GetSearchStatus() == 0) {
+			else if (WifiProfileDAO.GetSearchStatus() == 0) {
+				if (VPNConfigDAO.GetConnectedIpAddress() != null) {
+					warning_dialog.setWarning("You are Vpn will be disconnected!", "Continue");
+					if (!warning_dialog.showAndGetResult()) {
+						return;
+					} else { // todo fix duplicated
+						if (backgroundTask != null && backgroundTask.isRunning()) {
+							backgroundTask.cancel();
+						}
+
+						recheck_button.setText("Cancel");
+						connect_button.setText("Connect");
+						MediaPlayerTest(true);
+						backgroundTask = new Task<>() {
+							@Override
+							protected Void call() throws Exception {
+								RecheckAction();
+								return null;
+							}
+						};
+						VPNManager.cancelRecheckCanceler();
+						Thread backgroundThread = new Thread(backgroundTask);
+						backgroundThread.setDaemon(true);
+						backgroundThread.start();
+					}
+				} else {
+					if (backgroundTask != null && backgroundTask.isRunning()) {
+						backgroundTask.cancel();
+					}
 					// set status
-					System.out.println(WifiProfileDAO.GetSearchStatus());
-					System.out.println("In the Recheck session");
-					WifiProfileDAO.SetRecheckStatus();
+
 					recheck_button.setText("Cancel");
+					connect_button.setText("Connect");
+					MediaPlayerTest(true);
 					backgroundTask = new Task<>() {
 						@Override
 						protected Void call() throws Exception {
@@ -138,36 +177,42 @@ public class MainGuiController {
 							return null;
 						}
 					};
-
+					VPNManager.cancelRecheckCanceler();
 					Thread backgroundThread = new Thread(backgroundTask);
 					backgroundThread.setDaemon(true);
 					backgroundThread.start();
 				}
-
-				else if (WifiProfileDAO.GetSearchStatus() == 2) {
-					backgroundTask.cancel();
-					WifiProfileDAO.ResetSearchStatus(); // reapply 0
-					connect_status_label.setText("Recheck Cancelled now");
-					recheck_button.setText("Recheck");
-					System.out.println("Recheck canceled now");
-					OvpnFileTester.cancelOvpnProcess();
-					MediaPlayerTest(false);
-
-				}
-
 			}
-			// check if vpn is connected or not
-			// todo add warning
-			else {
+
+			else if (WifiProfileDAO.GetSearchStatus() == 2) {
 				if (backgroundTask != null && backgroundTask.isRunning()) {
 					backgroundTask.cancel();
-					VPNManager.disconnectVpn(this::UpdateConnectStatus);
-					VPNConfigDAO.SetVpnDisconnect();
-					ErrorDialog dialog = new ErrorDialog();
-					dialog.setErrorMessage("Connected to a Vpn currently");
-					dialog.show();
 				}
+				WifiProfileDAO.ResetSearchStatus(); // reapply 0
+				connect_status_label.setText("Recheck Cancelled now");
+				recheck_button.setText("Recheck");
+				System.out.println("Recheck canceled now");
+				OvpnFileTester.cancelOvpnProcess();
+				VPNManager.recheckCanceller();
+				MediaPlayerTest(false);
+
 			}
+
+			// check if vpn is connected or not
+			// todo add warning
+			// else {
+			// if (backgroundTask != null && backgroundTask.isRunning()) {
+			// backgroundTask.cancel();
+			// VPNManager.disconnectVpn(this::UpdateConnectStatus);
+			// VPNConfigDAO.SetVpnDisconnect();
+
+			// warning_dialog.setWarning("This will disconnect your vpn!", "continue");
+
+			// if (warning_dialog.showAndGetResult()) {
+			// System.out.println("continued");
+			// }
+			// }
+			// }
 
 		});
 
@@ -213,7 +258,7 @@ public class MainGuiController {
 					VPNConfigDAO.SetVpnDisconnect();
 					MediaPlayerTest(false);
 					connect_status_label.setText("Disconnected");
-					Refresh();
+					RefreshVpns();
 					Refresh2();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -228,6 +273,7 @@ public class MainGuiController {
 			stage.setOnCloseRequest(event -> {
 				System.out.println("Window is closing. Cleaning up...");
 				WifiProfileDAO.ResetSearchStatus();
+				VPNConfigDAO.SetVpnDisconnect();
 				try {
 					VPNManager.disconnectVpn(this::UpdateConnectStatus);
 				} catch (Exception e) {
@@ -277,7 +323,9 @@ public class MainGuiController {
 				System.out.println("Stopped search");
 
 				MediaPlayerTest(false);
-				backgroundTask.cancel();
+				if (backgroundTask != null && backgroundTask.isRunning()) {
+					backgroundTask.cancel();
+				}
 				search_ovpn_button.setText("Search");
 				return;
 			}
@@ -295,25 +343,45 @@ public class MainGuiController {
 	public void Refresh() throws SQLException {
 		System.out.println("Here");
 		int userId = UserDAO.getActiveUserId();
-		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
-
-		List<String> vpnCountries = VPNConfigDAO.getEncodedCountries(activeWifiProfileId);
 		List<String> wifiNames = WifiProfileDAO.getWifiNames(userId);
 		Collections.sort(wifiNames);
-		Collections.sort(vpnCountries);
-		ObservableList<String> observableVpnCountries = FXCollections.observableArrayList(vpnCountries);
 		ObservableList<String> observableWifiNames = FXCollections.observableArrayList(wifiNames);
-		vpn_profile_combo_box.setItems(observableWifiNames);
-		vpn_profile_combo_box.setValue(WifiProfileDAO.getActiveWifiProfileName());
-		config_combo_box.setItems(observableVpnCountries);
-		vpn_profile_combo_box.getItems().add("Add new profile");
-		active_wifi_profile_label.setText(WifiProfileDAO.getActiveWifiProfileName());
+		Platform.runLater(() -> {
+			// todo spacious of errors
+			vpn_profile_combo_box.setItems(observableWifiNames);
+			vpn_profile_combo_box.setValue(WifiProfileDAO.getActiveWifiProfileName());
+			vpn_profile_combo_box.getItems().add("Add new profile");
+			active_wifi_profile_label.setText(WifiProfileDAO.getActiveWifiProfileName());
+		});
+
+	}
+
+	public void RefreshVpns() {
+		// connect_status_label.setText("Refreshing Vpn List");
+		System.out.println("Refreshing Vpn list");
+		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
+		List<String> vpnCountries = VPNConfigDAO.getEncodedCountries(activeWifiProfileId);
+		// todo navigate to tab2
+		if (!vpnCountries.isEmpty()) {
+			Platform.runLater(() -> {
+				Collections.sort(vpnCountries);
+				ObservableList<String> observableVpnCountries = FXCollections.observableArrayList(vpnCountries);
+				config_combo_box.setItems(observableVpnCountries);
+				config_combo_box.setValue(vpnCountries.getFirst());
+			});
+		} else {
+			vpnCountries.add("Empty");
+			ObservableList<String> observableVpnCountries = FXCollections.observableArrayList(vpnCountries);
+			System.out.println("RefreshVPns occurs error");
+			config_combo_box.setItems(observableVpnCountries);
+			config_combo_box.setValue("Empty");
+		}
 
 	}
 
 	public void RefreshMain() {
-		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
-		VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId);
+		// int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
+		VPNConfigDAO.refreshAndGenerateEncodedCountries();
 	}
 
 	public void VPNConnect() throws IOException {
@@ -356,9 +424,11 @@ public class MainGuiController {
 	}
 
 	public void Refresh2() {
-		current_location_label.setText(
-				"Current Location: " + CountryCodeConverter.getCountryName(WifiProfileDAO.GetCurrentCountry()));
-		current_ip_label.setText("Ip: " + WifiProfileDAO.GetCurrentIpAddress());
+		Platform.runLater(() -> {
+			current_location_label.setText(
+					"Current Location: " + CountryCodeConverter.getCountryName(WifiProfileDAO.GetCurrentCountry()));
+			current_ip_label.setText("Ip: " + WifiProfileDAO.GetCurrentIpAddress());
+		});
 	}
 
 	public void UpdateSearchStatus(String message) {
@@ -375,6 +445,10 @@ public class MainGuiController {
 	}
 
 	public void RecheckAction() throws SQLException, Exception {
+		System.out.println(WifiProfileDAO.GetSearchStatus());
+		System.out.println("In the Recheck session");
+		VPNConfigDAO.SetVpnDisconnect();
+		WifiProfileDAO.SetRecheckStatus();
 		VPNManager.recheckTheOvpns(this, this::UpdateConnectStatus, this::UpdateConnectButton);
 	}
 

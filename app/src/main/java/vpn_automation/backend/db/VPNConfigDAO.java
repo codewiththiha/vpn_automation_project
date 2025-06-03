@@ -84,6 +84,9 @@ public class VPNConfigDAO {
 	}
 
 	public static List<String> getCountries(int wifiProfileID) {
+		if (wifiProfileID == 0) {
+			wifiProfileID = WifiProfileDAO.getActiveWifiProfileId();
+		}
 		List<String> countries = new ArrayList<>();
 		String query = "SELECT country FROM vpnconfig WHERE wifi_profile_id = ?";
 		try (Connection conn = DBConnection.getConnection();
@@ -105,7 +108,8 @@ public class VPNConfigDAO {
 		return countries;
 	}
 
-	public static void refreshAndGenerateEncodedCountries(int wifiProfileId) {
+	public static void refreshAndGenerateEncodedCountries() {
+		int wifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
 		List<String> countryCodes = getCountries(wifiProfileId);
 		CountryCodeConverter.resetCounter();
 		replaceWithNULLToEncoded(wifiProfileId);
@@ -317,7 +321,8 @@ public class VPNConfigDAO {
 		}
 	}
 
-	public static void DeleteUnresponsiveOvpn(int activeWifiProfileId, String ovpnPath) {
+	public static void DeleteUnresponsiveOvpn(String ovpnPath) {
+		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
 		String query = "DELETE FROM vpnconfig WHERE wifi_profile_id = ? AND ovpn_file_path = ?";
 		try (Connection conn = DBConnection.getConnection();
 				PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -467,7 +472,8 @@ public class VPNConfigDAO {
 			String Encodedcountry = CountryCodeConverter.counter(countryCode);
 			setEncodedCountries(Encodedcountry, countryCode.toUpperCase(), wifiProfileId);
 		}
-		guiController.Refresh();
+
+		// TODO
 	}
 
 }

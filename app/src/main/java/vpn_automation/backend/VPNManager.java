@@ -14,7 +14,7 @@ import vpn_automation.backend.db.WifiProfileDAO;
 import vpn_automation.gui.control.MainGuiController;
 
 public class VPNManager {
-
+	private static volatile boolean recheckCancelStatus = false;
 	private static volatile Process currentVpnProcess = null;
 	static List<String> errorKeywords = Arrays.asList("No route to host",
 			"TLS key negotiation failed to occur within 60 seconds", "failed: Connection timed out",
@@ -85,8 +85,8 @@ public class VPNManager {
 
 						for (String errorKeyword : errorKeywords) {
 							if (!connected && line.contains(errorKeyword)) {
-								VPNConfigDAO.DeleteUnresponsiveOvpn(activeWifiProfileId, ovpnPath);
-								VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId);
+								VPNConfigDAO.DeleteUnresponsiveOvpn(ovpnPath);
+								VPNConfigDAO.refreshAndGenerateEncodedCountries();
 								VPNManager.disconnectVpn();
 
 								if (currentVpnProcess != null && currentVpnProcess.isAlive()) {
@@ -95,12 +95,10 @@ public class VPNManager {
 								}
 
 								Platform.runLater(() -> {
-									try {
-										guiController.Refresh();
-									} catch (SQLException e) {
-										e.printStackTrace();
-									}
+									guiController.RefreshMain();
+									guiController.RefreshVpns();
 									guiController.Refresh2();
+
 								});
 
 								ConnectStatusGui.accept("Deleted");
@@ -112,8 +110,8 @@ public class VPNManager {
 						if (!connected && System.currentTimeMillis() - startTime >= 25 * 1000) {
 							System.out.println("Timeout reached, VPN not connected.");
 
-							VPNConfigDAO.DeleteUnresponsiveOvpn(activeWifiProfileId, ovpnPath);
-							VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId);
+							VPNConfigDAO.DeleteUnresponsiveOvpn(ovpnPath);
+							VPNConfigDAO.refreshAndGenerateEncodedCountries();
 							VPNManager.disconnectVpn();
 
 							if (currentVpnProcess != null && currentVpnProcess.isAlive()) {
@@ -122,11 +120,9 @@ public class VPNManager {
 							}
 
 							Platform.runLater(() -> {
-								try {
-									guiController.Refresh();
-								} catch (SQLException e) {
-									e.printStackTrace();
-								}
+								guiController.RefreshMain();
+								guiController.RefreshVpns();
+
 								guiController.Refresh2();
 							});
 
@@ -139,7 +135,12 @@ public class VPNManager {
 					// If the inner loop breaks due to a restart, continue to retry
 					if (!Thread.currentThread().isInterrupted()) {
 						// TODO will show with a pop up
-						ConnectStatusGui.accept("Reconnecting...");
+						if (currentVpnProcess != null) {
+							ConnectStatusGui.accept("Connected");
+						} else {
+							ConnectStatusGui.accept("Reconnecting...");
+						}
+
 						continue; // Retry connection
 					}
 
@@ -264,34 +265,31 @@ public class VPNManager {
 		List<String> ovpnPaths = VPNConfigDAO.getActiveProfileOvpnPaths(activeWifiProfileId);
 		System.out.println(ovpnPaths.size());
 		int i = 0;
-		boolean cancelStatus = false;
+		// boolean cancelStatus = false;
+		// currentVpnProcess = new ProcessBuilder("echo", "dummy").start();
 		for (String ovpnPath : ovpnPaths) {
 			i = i + 1;
 			ConnectStatusGui.accept("Rechecking" + i);
 
-			if (OvpnFileTester.testOvpnFileReCheck(ovpnPath) == 0) {
-				VPNConfigDAO.DeleteUnresponsiveOvpn(activeWifiProfileId, ovpnPath);
-				VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId, guiController);
-				// VPNManager.disconnectVpn();
-				// guiController.Refresh();
-				Platform.runLater(() -> {
-					try {
-						guiController.Refresh();
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				});
-			}
-			if (currentVpnProcess == null) {
+			if (recheckCancelStatus) {
 				System.out.println("Broke now");
-				cancelStatus = true;
+				// cancelStatus = true;
 				break;
 			}
-			VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId);
+			if (OvpnFileTester.testOvpnFileReCheck(ovpnPath) == 0) {
+				VPNConfigDAO.DeleteUnresponsiveOvpn(ovpnPath);
+				VPNConfigDAO.refreshAndGenerateEncodedCountries(activeWifiProfileId, guiController);
+				// VPNManager.disconnectVpn();
+
+				Platform.runLater(() -> {
+					guiController.RefreshVpns();
+				});
+			}
+			// TODO reconsider this line it is actually necessary?
+			VPNConfigDAO.refreshAndGenerateEncodedCountries();
 
 		}
-		if (!cancelStatus) {
+		if (!recheckCancelStatus) {
 			ConnectStatusGui.accept("Recheck completed");
 		} else {
 			ConnectStatusGui.accept("Canceled");
@@ -308,6 +306,16 @@ public class VPNManager {
 		// ConnectStatusGui.accept("Deleted");
 
 		// });
+	}
+
+	public static void recheckCanceller() {
+		System.out.println("Recheck cancel set");
+		recheckCancelStatus = true;
+	}
+
+	public static void cancelRecheckCanceler() {
+		System.out.println("Recheck cancel set");
+		recheckCancelStatus = false;
 	}
 
 }

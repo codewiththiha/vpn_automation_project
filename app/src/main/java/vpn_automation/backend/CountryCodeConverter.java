@@ -268,7 +268,10 @@ public class CountryCodeConverter {
 	 * @return The full country name (e.g., "Myanmar"), or null if not found.
 	 */
 	public static String getCountryName(String code) {
-		return countryNameMap.get(code.toUpperCase());
+		if (code != null) {
+			return countryNameMap.get(code.toUpperCase());
+		}
+		return code;
 	}
 
 	/**
