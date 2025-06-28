@@ -12,7 +12,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="630.0" prefWidth="492.0" style="-fx-background-color: #000f22;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vpn_automation.gui.control.LoginController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="630.0" prefWidth="492.0" style="-fx-background-color: #000f22;" xmlns="http://javafx.com/javafx/24" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vpn_automation.gui.control.LoginController">
    <center>
       <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
@@ -21,17 +21,17 @@
                   <Font size="35.0" />
                </font>
             </Text>
-            <TextField layoutX="84.0" layoutY="214.0" prefHeight="69.0" prefWidth="323.0" promptText="Email" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+            <TextField fx:id="email_field" layoutX="84.0" layoutY="214.0" prefHeight="69.0" prefWidth="323.0" promptText="Email" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
                <font>
                   <Font size="24.0" />
                </font>
             </TextField>
-            <PasswordField layoutX="84.0" layoutY="334.0" prefHeight="69.0" prefWidth="323.0" promptText="Password" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
+            <PasswordField fx:id="password_field" layoutX="84.0" layoutY="334.0" prefHeight="69.0" prefWidth="323.0" promptText="Password" style="-fx-background-color: black; -fx-border-color: white; -fx-border-radius: 10;">
                <font>
                   <Font size="24.0" />
                </font>
             </PasswordField>
-            <Button layoutX="206.0" layoutY="475.0" mnemonicParsing="false" style="-fx-border-radius: 1; -fx-background-color: #22f5a4;" text="Submit">
+            <Button fx:id="submit_button" layoutX="206.0" layoutY="475.0" mnemonicParsing="false" style="-fx-border-radius: 1; -fx-background-color: #22f5a4;" text="Submit">
                <font>
                   <Font name="System Bold" size="17.0" />
                </font>

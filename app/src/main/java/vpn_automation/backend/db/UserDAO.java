@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDAO {
 	public static void registerUser(String userName, String password, String email)
@@ -49,4 +51,87 @@ public class UserDAO {
 			return -1;
 		}
 	}
+
+	public static int checkLoginCred(String email, String password) throws SQLException {
+		String selectQuery = "SELECT user_id FROM vpn_automation_project.user WHERE password = ? AND email = ?";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(selectQuery)) {
+
+			// Set parameters before executing the query
+			pstmt.setString(1, password);
+			pstmt.setString(2, email);
+
+			// Now execute the query
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt("user_id");
+				} else {
+					return -1; // No user found
+				}
+			}
+		} catch (SQLException e) {
+			System.err.println("Error retrieving active user ID:");
+			e.printStackTrace();
+			return -1;
+		}
+	}
+
+	public static void setLoginUser(int userID) {
+		String query = "UPDATE user SET login_or_logout = 1 where user_id = ?";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, userID);
+
+			// Execute the update
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Set user to " + userID);
+			} else {
+				System.out.println("Set user Failed");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void logoutUser() throws SQLException {
+		String query = "UPDATE user SET login_or_logout = 0 where login_or_logout = 1";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Logout Succeeded");
+
+			} else {
+				System.out.println("Logout Failed");
+			}
+		}
+	}
+
+	public static List<String> getRegisteredEmails() {
+		List<String> registeredEmails = new ArrayList<>();
+		String query = "SELECT email FROM user";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				String country = rs.getString("email");
+				registeredEmails.add(country);
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving Emails");
+			e.printStackTrace();
+		}
+
+		return registeredEmails;
+	}
+
 }

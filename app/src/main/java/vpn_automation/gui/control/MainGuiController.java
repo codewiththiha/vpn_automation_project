@@ -24,6 +24,7 @@ import vpn_automation.backend.VPNManager;
 import vpn_automation.backend.db.UserDAO;
 import vpn_automation.backend.db.VPNConfigDAO;
 import vpn_automation.backend.db.WifiProfileDAO;
+import vpn_automation.gui.NavigationUtils;
 import javafx.scene.media.MediaView;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -82,8 +83,9 @@ public class MainGuiController {
 	private MediaView media_view;
 	private MediaPlayer mediaPlayer;
 
-	public void initialize() throws Exception {
+	boolean firstTime = true;
 
+	public void initialize() throws Exception {
 		RefreshMain();
 		Refresh();
 		Refresh2();
@@ -123,6 +125,61 @@ public class MainGuiController {
 				// }
 
 			}
+		});
+
+		edit_user_name_button.setOnAction(event -> {
+			ChangeName dialog = new ChangeName();
+			dialog.show();
+		});
+
+		log_out_button.setOnAction(event -> {
+			WarningDialog warning_dialog = new WarningDialog();
+			if (VPNConfigDAO.GetConnectedIpAddress() != null) {
+				warning_dialog.setWarning("You are Vpn will be disconnected!", "Continue");
+				if (!warning_dialog.showAndGetResult()) {
+					return;
+				} else { // todo fix duplicated
+					if (backgroundTask != null && backgroundTask.isRunning()) {
+						backgroundTask.cancel();
+					}
+					try {
+						VPNManager.disconnectVpn();
+						VPNConfigDAO.SetVpnDisconnect();
+						MediaPlayerTest(false);
+						connect_status_label.setText("Disconnected");
+						RefreshVpns();
+						Refresh2();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					System.out.println("Vpn disconnected");
+				}
+			}
+
+			System.out.println("No VPN connections in current usage");
+
+			if (WifiProfileDAO.GetSearchStatus() == 1) {
+				WifiProfileDAO.ResetSearchStatus();
+				System.out.println("Stopped search");
+
+				MediaPlayerTest(false);
+				if (backgroundTask != null && backgroundTask.isRunning()) {
+					backgroundTask.cancel();
+				}
+				search_ovpn_button.setText("Search");
+
+			}
+
+			Stage currentStage = (Stage) log_out_button.getScene().getWindow();
+			try {
+				WifiProfileDAO.resetActiveProfile();
+				UserDAO.logoutUser();
+
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			NavigationUtils.navigateTo(currentStage, "/fxml_files/login_or_register.fxml");
 		});
 
 		recheck_button.setOnAction(event -> {
@@ -171,6 +228,7 @@ public class MainGuiController {
 					connect_button.setText("Connect");
 					MediaPlayerTest(true);
 					backgroundTask = new Task<>() {
+
 						@Override
 						protected Void call() throws Exception {
 							RecheckAction();
@@ -271,8 +329,8 @@ public class MainGuiController {
 			Stage stage = (Stage) connect_button.getScene()
 					.getWindow();
 			stage.setOnCloseRequest(event -> {
+				WifiProfileDAO.forceResetSearchStatus();
 				System.out.println("Window is closing. Cleaning up...");
-				WifiProfileDAO.ResetSearchStatus();
 				VPNConfigDAO.SetVpnDisconnect();
 				try {
 					VPNManager.disconnectVpn(this::UpdateConnectStatus);
@@ -362,12 +420,19 @@ public class MainGuiController {
 		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
 		List<String> vpnCountries = VPNConfigDAO.getEncodedCountries(activeWifiProfileId);
 		// todo navigate to tab2
+		System.out.println(vpnCountries.isEmpty());
 		if (!vpnCountries.isEmpty()) {
 			Platform.runLater(() -> {
+				config_combo_box.setValue(vpnCountries.getFirst());
 				Collections.sort(vpnCountries);
 				ObservableList<String> observableVpnCountries = FXCollections.observableArrayList(vpnCountries);
 				config_combo_box.setItems(observableVpnCountries);
-				config_combo_box.setValue(vpnCountries.getFirst());
+				if (firstTime) {
+					System.out.println("Here");
+					config_combo_box.setValue(vpnCountries.getFirst());
+					firstTime = false;
+				}
+
 			});
 		} else {
 			vpnCountries.add("Empty");
@@ -423,6 +488,10 @@ public class MainGuiController {
 		Platform.runLater(() -> connect_button.setText(message));
 	}
 
+	public void UpdateRecheckButton(String message) {
+		Platform.runLater(() -> recheck_button.setText(message));
+	}
+
 	public void Refresh2() {
 		Platform.runLater(() -> {
 			current_location_label.setText(
@@ -449,7 +518,8 @@ public class MainGuiController {
 		System.out.println("In the Recheck session");
 		VPNConfigDAO.SetVpnDisconnect();
 		WifiProfileDAO.SetRecheckStatus();
-		VPNManager.recheckTheOvpns(this, this::UpdateConnectStatus, this::UpdateConnectButton);
+		VPNManager.recheckTheOvpns(this, this::UpdateConnectStatus, this::UpdateConnectButton,
+				this::UpdateRecheckButton);
 	}
 
 	public void MediaPlayerTest(boolean loadStatus) {

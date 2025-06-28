@@ -127,6 +127,33 @@ public class WifiProfileDAO {
 
 	}
 
+	public static void setSelectedWifiNameActive(int user_id) {
+		if (user_id > 0) {
+			String deactivateQuery = "UPDATE wifiprofile SET active_profile = 0";
+			String activateQuery = "UPDATE wifiprofile SET active_profile = 1 WHERE user_id = ? Limit 1";
+
+			try (Connection conn = DBConnection.getConnection()) {
+				// Deactivate all profiles first
+				try (PreparedStatement pstmt1 = conn.prepareStatement(deactivateQuery)) {
+					pstmt1.executeUpdate();
+				}
+
+				// Activate only the selected profile
+				try (PreparedStatement pstmt2 = conn.prepareStatement(activateQuery)) {
+					pstmt2.setInt(1, user_id);
+					pstmt2.executeUpdate();
+				}
+
+			} catch (SQLException e) {
+				System.err.println("Error updating active_profile:");
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("Your wifi is deleted");
+		}
+
+	}
+
 	public static String getActiveWifiProfileName() {
 		String query = "SELECT wifi_name from wifiprofile WHERE active_profile = 1";
 		try (Connection conn = DBConnection.getConnection();
@@ -276,6 +303,46 @@ public class WifiProfileDAO {
 			}
 
 		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void forceResetSearchStatus() {
+		String query = "UPDATE wifiprofile SET search_status = 0 WHERE search_status != 0 OR search_status IS NULL";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			// Execute the update
+			int rowsUpdated = pstmt.executeUpdate();
+
+			if (rowsUpdated > 0) {
+				System.out.println("Search Status set to 0");
+			} else {
+				System.out.println("Failed");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void resetActiveProfile() {
+
+		String deactivateQuery = "UPDATE wifiprofile SET active_profile = 0";
+
+		try (Connection conn = DBConnection.getConnection()) {
+			// Deactivate all profiles first
+			try (PreparedStatement pstmt = conn.prepareStatement(deactivateQuery)) {
+				int rowsUpdated = pstmt.executeUpdate();
+				if (rowsUpdated > 0) {
+					System.out.println("active profiles set to 0");
+				} else {
+					System.out.println("set failed");
+				}
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error updating active_profile:");
 			e.printStackTrace();
 		}
 	}

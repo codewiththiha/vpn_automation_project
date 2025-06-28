@@ -1,6 +1,7 @@
 package vpn_automation.gui.control;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -49,6 +50,7 @@ public class RegisterController {
 
 	@FXML
 	private void handleRegister() throws SQLException {
+		List<String> emails = UserDAO.getRegisteredEmails();
 		ErrorDialog dialog = new ErrorDialog();
 		String firstName = first_name_field.getText();
 		String lastName = last_name_field.getText();
@@ -81,7 +83,12 @@ public class RegisterController {
 		} else if (!password.equals(confirmPassword)) {
 			dialog.setErrorMessage("Password didn't match!");
 			dialog.show();
-		} else {
+		} else if (emails.contains(email)) {
+			dialog.setErrorMessage("This email is already Registered!!");
+			dialog.show();
+		}
+
+		else {
 			dialog.setErrorMessage("Succeed!");
 			dialog.show();
 			UserDAO.registerUser(fullName, confirmPassword, email);

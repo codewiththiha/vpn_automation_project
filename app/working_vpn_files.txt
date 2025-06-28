@@ -1,16 +1,7 @@
 Working VPN Configuration Files:
 ----------------------------------------
-/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_public-vpn-43.opengw.net_tcp_443.ovpn
 /home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_public-vpn-225.opengw.net_tcp_443.ovpn
 /home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_public-vpn-221.opengw.net_udp_1195.ovpn
 /home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_public-vpn-48.opengw.net_tcp_443.ovpn
 /home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_public-vpn-134.opengw.net_udp_1195.ovpn
 /home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_public-vpn-105.opengw.net_tcp_443.ovpn
-/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_public-vpn-198.opengw.net_tcp_443.ovpn
-/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_public-vpn-230.opengw.net_udp_1195.ovpn
-/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_public-vpn-41.opengw.net_tcp_443.ovpn
-/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_vpn938522983.opengw.net_udp_1774.ovpn
-/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_vpn152350709.opengw.net_udp_1312.ovpn
-/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_vpn742271140.opengw.net_udp_1195.ovpn
-/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_vpn529644752.opengw.net_udp_1195.ovpn
-/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files/vpngate_vpn137183472.opengw.net_udp_1305.ovpn

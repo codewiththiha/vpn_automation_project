@@ -260,7 +260,8 @@ public class VPNManager {
 	}
 
 	public static void recheckTheOvpns(MainGuiController guiController,
-			Consumer<String> ConnectStatusGui, Consumer<String> ConnectButtonGui) throws SQLException, Exception {
+			Consumer<String> ConnectStatusGui, Consumer<String> ConnectButtonGui, Consumer<String> RecheckButtonGui)
+			throws SQLException, Exception {
 		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
 		List<String> ovpnPaths = VPNConfigDAO.getActiveProfileOvpnPaths(activeWifiProfileId);
 		System.out.println(ovpnPaths.size());
@@ -291,6 +292,7 @@ public class VPNManager {
 		}
 		if (!recheckCancelStatus) {
 			ConnectStatusGui.accept("Recheck completed");
+			RecheckButtonGui.accept("Recheck");
 		} else {
 			ConnectStatusGui.accept("Canceled");
 		}

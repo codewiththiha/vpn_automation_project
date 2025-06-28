@@ -18,9 +18,12 @@ public class RESMain extends Application {
 
 	@Override
 	public void start(Stage stage) throws IOException, SQLException {
+		WifiProfileDAO.forceResetSearchStatus();
 		int activeUserId = UserDAO.getActiveUserId();
 		FXMLLoader loader = null;
-
+		if (activeUserId == -1) {
+			loader = new FXMLLoader(getClass().getResource("/fxml_files/register_form.fxml"));
+		}
 		if (activeUserId != -1) {
 			List<Integer> wifiProfileIds = WifiProfileDAO.getWifiProfileIds(activeUserId);
 			if (wifiProfileIds != null && !wifiProfileIds.isEmpty()) {

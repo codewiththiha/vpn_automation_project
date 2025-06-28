@@ -24,7 +24,6 @@ public class DBConnection {
 		config.setIdleTimeout(30000);
 		config.setMaxLifetime(2000000);
 		config.setConnectionTestQuery("SELECT 1");
-
 		dataSource = new HikariDataSource(config);
 	}
 
