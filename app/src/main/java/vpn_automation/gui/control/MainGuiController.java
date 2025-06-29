@@ -90,6 +90,7 @@ public class MainGuiController {
 		Refresh();
 		Refresh2();
 		RefreshVpns();
+		logged_in_user_label.setText(UserDAO.getActiveUserName());
 
 		String currentDir = "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
 
@@ -129,6 +130,12 @@ public class MainGuiController {
 
 		edit_user_name_button.setOnAction(event -> {
 			ChangeName dialog = new ChangeName();
+			dialog.initialize(this::UpdateDisplayProfileName);
+			dialog.show();
+		});
+
+		change_password_button.setOnAction(event -> {
+			ChangePassword dialog = new ChangePassword();
 			dialog.show();
 		});
 
@@ -490,6 +497,10 @@ public class MainGuiController {
 
 	public void UpdateRecheckButton(String message) {
 		Platform.runLater(() -> recheck_button.setText(message));
+	}
+
+	public void UpdateDisplayProfileName(String message) {
+		Platform.runLater(() -> logged_in_user_label.setText(message));
 	}
 
 	public void Refresh2() {

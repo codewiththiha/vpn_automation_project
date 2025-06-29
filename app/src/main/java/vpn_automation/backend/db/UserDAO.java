@@ -52,6 +52,50 @@ public class UserDAO {
 		}
 	}
 
+	public static String getActiveUserName() throws SQLException {
+		String selectQuery = "SELECT username FROM user WHERE login_or_logout = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(selectQuery);
+				ResultSet rs = pstmt.executeQuery()) {
+
+			if (rs.next()) {
+				// Return the first active user ID found
+				return rs.getString("username");
+			} else {
+				// No active user found for case -1 - i need to check whether sql int support
+				// negative values!
+				return null;
+			}
+		} catch (SQLException e) {
+			System.err.println("Error retrieving active user name:");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static String getActiveUserPass() throws SQLException {
+		String selectQuery = "SELECT password FROM vpn_automation_project.user WHERE login_or_logout = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(selectQuery);
+				ResultSet rs = pstmt.executeQuery()) {
+
+			if (rs.next()) {
+				// Return the first active user ID found
+				return rs.getString("password");
+			} else {
+				// No active user found for case -1 - i need to check whether sql int support
+				// negative values!
+				return null;
+			}
+		} catch (SQLException e) {
+			System.err.println("Error retrieving active user pass");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	public static int checkLoginCred(String email, String password) throws SQLException {
 		String selectQuery = "SELECT user_id FROM vpn_automation_project.user WHERE password = ? AND email = ?";
 
@@ -132,6 +176,42 @@ public class UserDAO {
 		}
 
 		return registeredEmails;
+	}
+
+	public static void ChangeName(String name) {
+		String query = "UPDATE vpn_automation_project.user SET username = ? WHERE login_or_logout = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+			pstmt.setString(1, name);
+			int rowsUpdated = pstmt.executeUpdate();
+			if (rowsUpdated > 0) {
+				System.out.println("Change Succeeded");
+			} else {
+				System.out.println("Change Failed");
+			}
+		} catch (SQLException e) {
+			System.err.println("Error updating username");
+			e.printStackTrace();
+		}
+	}
+
+	public static void ChangePassword(String password) {
+		String query = "UPDATE vpn_automation_project.user SET password = ? WHERE login_or_logout = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+			pstmt.setString(1, password);
+			int rowsUpdated = pstmt.executeUpdate();
+			if (rowsUpdated > 0) {
+				System.out.println("Change Succeeded");
+			} else {
+				System.out.println("Change Failed");
+			}
+		} catch (SQLException e) {
+			System.err.println("Error updating password");
+			e.printStackTrace();
+		}
 	}
 
 }
