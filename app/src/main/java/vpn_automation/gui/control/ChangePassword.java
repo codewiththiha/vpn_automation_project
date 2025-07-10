@@ -3,7 +3,6 @@ package vpn_automation.gui.control;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.function.Consumer;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

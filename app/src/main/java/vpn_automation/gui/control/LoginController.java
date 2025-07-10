@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -13,7 +12,6 @@ import vpn_automation.backend.db.UserDAO;
 import vpn_automation.backend.db.VPNConfigDAO;
 import vpn_automation.backend.db.WifiProfileDAO;
 import vpn_automation.gui.NavigationUtils;
-import vpn_automation.gui.RESMain;
 
 public class LoginController {
 

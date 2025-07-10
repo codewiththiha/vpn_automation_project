@@ -2,7 +2,6 @@ package vpn_automation;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import vpn_automation.gui.control.ErrorDialog;
 import vpn_automation.gui.control.NewProfile;
 
 public class PopUp extends Application {

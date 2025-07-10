@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-public class Main extends Application {
+public class RESMain extends Application {
 
 	@Override
 	public void start(Stage stage) throws IOException, SQLException {

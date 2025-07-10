@@ -10,6 +10,7 @@ plugins {
 	java
     application
 	id("org.openjfx.javafxplugin") version "0.1.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 javafx {
@@ -67,7 +68,7 @@ tasks.register<JavaExec>("runGui") {
     group = "application"
     description = "Runs the JavaFX Gui application"
     // mainClass.set("vpn_automation.gui.Main2")
-	mainClass.set("vpn_automation.gui.RESMain")
+	mainClass.set("vpn_automation.Main")
 	// mainClass.set("vpn_automation.PopUp")
     classpath = sourceSets.main.get().runtimeClasspath
     jvmArgs = listOf(
@@ -86,4 +87,152 @@ tasks.register<JavaExec>("TestDB") {
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass.set("vpn_automation.backend.db.ConnectionTest")
     dependsOn(tasks.classes)
+}
+
+// Task to create a custom runtime image with jlink
+tasks.register<Exec>("createRuntimeImage") {
+    group = "distribution"
+    description = "Creates a custom runtime image using jlink"
+    dependsOn(tasks.jar)
+    
+    val runtimeImageDir = file("$buildDir/runtime-image")
+    
+    doFirst {
+        // Clean previous runtime image
+        delete(runtimeImageDir)
+        runtimeImageDir.mkdirs()
+    }
+    
+    // Get JavaFX module path
+    val javaFxModulePath = configurations.runtimeClasspath.get().files
+        .filter { it.name.contains("javafx") }
+        .joinToString(File.pathSeparator) { it.absolutePath }
+    
+    val allDependencies = configurations.runtimeClasspath.get().files
+        .joinToString(File.pathSeparator) { it.absolutePath }
+    
+    commandLine(
+        "jlink",
+        "--module-path", "$javaFxModulePath${File.pathSeparator}$allDependencies",
+        "--add-modules", "java.base,java.desktop,java.logging,java.sql,javafx.controls,javafx.fxml,javafx.web",
+        "--output", runtimeImageDir.absolutePath,
+        "--compress=2",
+        "--no-header-files",
+        "--no-man-pages"
+    )
+}
+
+// Task to package the application using jpackage
+tasks.register<Exec>("packageApp") {
+    group = "distribution"
+    description = "Creates a native application package using jpackage"
+    dependsOn(tasks.jar, "createRuntimeImage")
+    
+    val appImageDir = file("$buildDir/app-image")
+    val jarFile = tasks.jar.get().archiveFile.get().asFile
+    val runtimeImageDir = file("$buildDir/runtime-image")
+    
+    doFirst {
+        // Clean previous app image
+        delete(appImageDir)
+        appImageDir.mkdirs()
+    }
+    
+    val allDependencies = configurations.runtimeClasspath.get().files
+        .joinToString(File.pathSeparator) { it.absolutePath }
+    
+    commandLine(
+        "jpackage",
+        "--type", "app-image",
+        "--input", jarFile.parent,
+        "--dest", appImageDir.absolutePath,
+        "--name", "VPNAutomator",
+        "--main-class", "vpn_automation.Main",
+        "--main-jar", jarFile.name,
+        "--runtime-image", runtimeImageDir.absolutePath,
+        "--module-path", allDependencies,
+        "--add-modules", "java.base,java.desktop,java.logging,java.sql,javafx.controls,javafx.fxml,javafx.web",
+        "--app-version", "1.0.0",
+        "--vendor", "VPN Automation Inc",
+        "--description", "VPN Automation Application"
+    )
+}
+
+// Task to create a platform-specific installer
+tasks.register<Exec>("createInstaller") {
+    group = "distribution"
+    description = "Creates a platform-specific installer"
+    dependsOn(tasks.jar)
+    
+    val installerDir = file("$buildDir/installer")
+    val jarFile = tasks.jar.get().archiveFile.get().asFile
+    
+    doFirst {
+        delete(installerDir)
+        installerDir.mkdirs()
+    }
+    
+    val allDependencies = configurations.runtimeClasspath.get().files
+        .joinToString(File.pathSeparator) { it.absolutePath }
+    
+    // For Linux, create a .deb package
+    commandLine(
+        "jpackage",
+        "--input", jarFile.parent,
+        "--dest", installerDir.absolutePath,
+        "--name", "vpn-automator",
+        "--main-class", "vpn_automation.Main",
+        "--main-jar", jarFile.name,
+        "--module-path", allDependencies,
+        "--add-modules", "java.base,java.desktop,java.logging,java.sql,javafx.controls,javafx.fxml,javafx.web",
+        "--app-version", "1.0.0",
+        "--vendor", "VPN Automation Inc",
+        "--description", "VPN Automation Application",
+        "--linux-shortcut",
+        "--linux-menu-group", "Network"
+    )
+}
+
+// Create fat jar 
+// TODO
+// Configure the shadowJar task
+tasks.shadowJar {
+    archiveClassifier.set("fat")
+    // Set the main class
+    manifest {
+        attributes["Main-Class"] = "vpn_automation.Main"
+    }
+    // Merge Service files to avoid issues
+    mergeServiceFiles()
+}
+
+// Ensure distribution tasks don't conflict with shadowJar
+tasks.distZip {
+    dependsOn(tasks.shadowJar)
+}
+tasks.distTar {
+    dependsOn(tasks.shadowJar)
+}
+tasks.startScripts {
+    dependsOn(tasks.shadowJar)
+}
+
+
+
+
+// Task to copy runtime dependencies
+tasks.register<Copy>("copyDependencies") {
+    group = "distribution"
+    description = "Copies runtime dependencies to build/distribution/lib"
+    from(configurations.runtimeClasspath)
+    into("$buildDir/distribution/lib")
+}
+
+// Task to print classpath for debugging
+tasks.register("printClasspath") {
+    group = "help"
+    description = "Prints the runtime classpath"
+    doLast {
+        println(configurations.runtimeClasspath.get().asPath)
+    }
 }
