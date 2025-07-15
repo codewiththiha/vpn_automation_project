@@ -20,162 +20,270 @@ public class VPNManager {
 			"TLS key negotiation failed to occur within 60 seconds", "failed: Connection timed out",
 			"Connection refused");
 
+	// public static void connectVpn(String ovpnPath, Consumer<String>
+	// ConnectStatusGui,
+	// Consumer<String> LocationStatusGui,
+	// Consumer<String> IpStatusGui, int activeWifiProfileId, String encodedName,
+	// Consumer<String> ConnectButtonGui,
+	// MainGuiController guiController) throws IOException {
+	// if (ovpnPath == null || ovpnPath.isEmpty()) {
+	// ConnectStatusGui.accept("Please Choose one");
+	// guiController.MediaPlayerTest(false);
+	// return;
+	// }
+	// long startTime = System.currentTimeMillis();
+	// boolean connected = false;
+	// while (!Thread.currentThread().isInterrupted()) {
+	// try {
+	// ProcessBuilder pb = new ProcessBuilder("openvpn", ovpnPath);
+	// pb.redirectErrorStream(true);
+
+	// currentVpnProcess = pb.start();
+
+	// try (BufferedReader reader = new BufferedReader(
+	// new InputStreamReader(currentVpnProcess.getInputStream()))) {
+
+	// String line;
+
+	// System.out.println("here09");
+	// while (!Thread.currentThread().isInterrupted() && (line = reader.readLine())
+	// != null) {
+
+	// System.out.println(line);
+
+	// if (!connected && line.contains("Initialization Sequence Completed")) {
+	// ConnectStatusGui.accept("Connected");
+	// VPNConfigDAO.SetConnection(activeWifiProfileId, encodedName);
+	// guiController.MediaPlayerTest(false);
+	// LocationStatusGui.accept("Current Location: " +
+	// CountryCodeConverter.getCountryName(
+	// VPNConfigDAO.GetConnectedCountry()));
+	// IpStatusGui.accept("Ip: " + VPNConfigDAO.GetConnectedIpAddress());
+	// ConnectButtonGui.accept("Disconnect");
+	// connected = true;
+
+	// }
+	// if (!connected) {
+
+	// ConnectStatusGui.accept("Connecting...");
+
+	// }
+
+	// // Handle restart
+	// if (line.contains("SIGUSR1[soft,ping-restart] received, process restarting"))
+	// {
+	// ConnectStatusGui.accept("Connection restarting...");
+	// startTime = System.currentTimeMillis();
+	// connected = false; // Reset flag
+	// System.out.println("Restart detected, attempting reconnection...");
+
+	// // Destroy the current process
+	// if (currentVpnProcess != null && currentVpnProcess.isAlive()) {
+	// currentVpnProcess.destroyForcibly();
+	// currentVpnProcess.waitFor(); // Ensure process is terminated
+	// }
+
+	// // Break inner loop to restart the outer loop (reconnect)
+	// break;
+	// }
+	// // will add auto reconnect
+
+	// // for (String errorKeyword : errorKeywords) {
+	// // if (!connected && line.contains(errorKeyword)) {
+	// // VPNConfigDAO.DeleteUnresponsiveOvpn(ovpnPath);
+	// // VPNConfigDAO.refreshAndGenerateEncodedCountries();
+	// // VPNManager.disconnectVpn();
+
+	// // if (currentVpnProcess != null && currentVpnProcess.isAlive()) {
+	// // currentVpnProcess.destroyForcibly();
+	// // currentVpnProcess.waitFor();
+	// // }
+
+	// // Platform.runLater(() -> {
+	// // guiController.RefreshMain();
+	// // guiController.RefreshVpns();
+	// // guiController.Refresh2();
+
+	// // });
+
+	// // ConnectStatusGui.accept("Deleted");
+	// // break;
+	// // }
+	// // }
+
+	// // Timeout check: if 25 seconds passed and still not connected
+	// if (!connected && System.currentTimeMillis() - startTime >= 25 * 1000) {
+	// System.out.println("Timeout reached, VPN not connected.");
+
+	// VPNConfigDAO.DeleteUnresponsiveOvpn(ovpnPath);
+	// VPNConfigDAO.refreshAndGenerateEncodedCountries();
+	// VPNManager.disconnectVpn();
+
+	// if (currentVpnProcess != null && currentVpnProcess.isAlive()) {
+	// currentVpnProcess.destroyForcibly();
+	// currentVpnProcess.waitFor();
+	// }
+
+	// Platform.runLater(() -> {
+	// guiController.RefreshMain();
+	// guiController.RefreshVpns();
+
+	// guiController.Refresh2();
+	// });
+
+	// ConnectStatusGui.accept("Canceled");
+	// break;
+	// }
+
+	// }
+
+	// // If the inner loop breaks due to a restart, continue to retry
+	// if (!Thread.currentThread().isInterrupted()) {
+	// // TODO will show with a pop up
+	// if (currentVpnProcess != null) {
+	// ConnectStatusGui.accept("Connected");
+	// } else {
+	// guiController.MediaPlayerTest(false);
+	// ConnectStatusGui.accept("Canceled");
+	// }
+
+	// break; // Retry connection replace with continue
+	// }
+
+	// } catch (InterruptedException e) {
+	// ConnectStatusGui.accept("Disconnected");
+	// Thread.currentThread().interrupt(); // Restore interrupt status
+	// if (currentVpnProcess != null && currentVpnProcess.isAlive()) {
+	// currentVpnProcess.destroyForcibly();
+	// }
+	// break; // Exit outer loop on interrupt
+
+	// } catch (IOException e) {
+	// ConnectStatusGui.accept("Error reading OpenVPN output: " + e.getMessage());
+	// break; // Exit on IO error
+	// }
+
+	// // Wait for process to exit and check exit code
+	// try {
+	// int exitCode = currentVpnProcess.waitFor();
+	// ConnectStatusGui.accept("VPN connection ended with exit code: " + exitCode);
+	// } catch (InterruptedException e) {
+	// ConnectButtonGui.accept("Connect");
+	// disconnectVpn(ConnectStatusGui);
+	// ConnectStatusGui.accept("Disconnected");
+	// Thread.currentThread().interrupt();
+	// break;
+	// }
+
+	// } catch (IOException e) {
+	// ConnectStatusGui.accept("Error starting OpenVPN: " + e.getMessage());
+	// break; // Exit on process start failure
+	// } finally {
+	// currentVpnProcess = null; // Reset process reference
+	// }
+	// }
+	// }
 	public static void connectVpn(String ovpnPath, Consumer<String> ConnectStatusGui,
 			Consumer<String> LocationStatusGui,
 			Consumer<String> IpStatusGui, int activeWifiProfileId, String encodedName,
 			Consumer<String> ConnectButtonGui,
-			MainGuiController guiController) throws IOException {
+			MainGuiController guiController) throws IOException, InterruptedException {
+
 		if (ovpnPath == null || ovpnPath.isEmpty()) {
 			ConnectStatusGui.accept("Please Choose one");
 			guiController.MediaPlayerTest(false);
 			return;
 		}
+
+		long timeoutMs = 25_000;
+		boolean[] connected = { false };
+		boolean[] restartRequested = { false };
 		long startTime = System.currentTimeMillis();
-		boolean connected = false;
-		while (!Thread.currentThread().isInterrupted()) {
-			try {
-				ProcessBuilder pb = new ProcessBuilder("openvpn", ovpnPath);
-				pb.redirectErrorStream(true);
 
-				currentVpnProcess = pb.start();
+		ProcessBuilder pb = new ProcessBuilder("openvpn", ovpnPath);
+		pb.redirectErrorStream(true);
+		Process vpnProcess = pb.start();
+		currentVpnProcess = vpnProcess;
 
-				try (BufferedReader reader = new BufferedReader(
-						new InputStreamReader(currentVpnProcess.getInputStream()))) {
+		Thread readerThread = new Thread(() -> {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(vpnProcess.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null && !Thread.currentThread().isInterrupted()) {
+					System.out.println(line);
 
-					String line;
-
-					System.out.println("here09");
-					while (!Thread.currentThread().isInterrupted() && (line = reader.readLine()) != null) {
-
-						System.out.println(line);
-
-						if (!connected && line.contains("Initialization Sequence Completed")) {
-							ConnectStatusGui.accept("Connected");
-							VPNConfigDAO.SetConnection(activeWifiProfileId, encodedName);
-							guiController.MediaPlayerTest(false);
-							LocationStatusGui.accept("Current Location: " + CountryCodeConverter.getCountryName(
-									VPNConfigDAO.GetConnectedCountry()));
-							IpStatusGui.accept("Ip: " + VPNConfigDAO.GetConnectedIpAddress());
-							ConnectButtonGui.accept("Disconnect");
-							connected = true;
-
-						}
-						if (!connected) {
-							ConnectStatusGui.accept("Connecting...");
-
-						}
-
-						// Handle restart
-						if (line.contains("SIGUSR1[soft,ping-restart] received, process restarting")) {
-							ConnectStatusGui.accept("Connection restarting...");
-							startTime = System.currentTimeMillis();
-							connected = false; // Reset flag
-							System.out.println("Restart detected, attempting reconnection...");
-
-							// Destroy the current process
-							if (currentVpnProcess != null && currentVpnProcess.isAlive()) {
-								currentVpnProcess.destroyForcibly();
-								currentVpnProcess.waitFor(); // Ensure process is terminated
-							}
-
-							// Break inner loop to restart the outer loop (reconnect)
-							break;
-						}
-						// will add auto reconnect
-
-						for (String errorKeyword : errorKeywords) {
-							if (!connected && line.contains(errorKeyword)) {
-								VPNConfigDAO.DeleteUnresponsiveOvpn(ovpnPath);
-								VPNConfigDAO.refreshAndGenerateEncodedCountries();
-								VPNManager.disconnectVpn();
-
-								if (currentVpnProcess != null && currentVpnProcess.isAlive()) {
-									currentVpnProcess.destroyForcibly();
-									currentVpnProcess.waitFor();
-								}
-
-								Platform.runLater(() -> {
-									guiController.RefreshMain();
-									guiController.RefreshVpns();
-									guiController.Refresh2();
-
-								});
-
-								ConnectStatusGui.accept("Deleted");
-								break;
-							}
-						}
-
-						// Timeout check: if 25 seconds passed and still not connected
-						if (!connected && System.currentTimeMillis() - startTime >= 25 * 1000) {
-							System.out.println("Timeout reached, VPN not connected.");
-
-							VPNConfigDAO.DeleteUnresponsiveOvpn(ovpnPath);
-							VPNConfigDAO.refreshAndGenerateEncodedCountries();
-							VPNManager.disconnectVpn();
-
-							if (currentVpnProcess != null && currentVpnProcess.isAlive()) {
-								currentVpnProcess.destroyForcibly();
-								currentVpnProcess.waitFor();
-							}
-
-							Platform.runLater(() -> {
-								guiController.RefreshMain();
-								guiController.RefreshVpns();
-
-								guiController.Refresh2();
-							});
-
-							ConnectStatusGui.accept("Deleted");
-							break;
-						}
-
+					if (!connected[0]) {
+						ConnectStatusGui.accept("Connecting...");
 					}
 
-					// If the inner loop breaks due to a restart, continue to retry
-					if (!Thread.currentThread().isInterrupted()) {
-						// TODO will show with a pop up
-						if (currentVpnProcess != null) {
-							ConnectStatusGui.accept("Connected");
-						} else {
-							ConnectStatusGui.accept("Reconnecting...");
-						}
-
-						continue; // Retry connection
+					if (line.contains("Initialization Sequence Completed")) {
+						connected[0] = true;
+						ConnectStatusGui.accept("Connected");
+						VPNConfigDAO.SetConnection(activeWifiProfileId, encodedName);
+						guiController.MediaPlayerTest(false);
+						LocationStatusGui.accept("Current Location: " + CountryCodeConverter.getCountryName(
+								VPNConfigDAO.GetConnectedCountry()));
+						IpStatusGui.accept("Ip: " + VPNConfigDAO.GetConnectedIpAddress());
+						ConnectButtonGui.accept("Disconnect");
+						break;
 					}
 
-				} catch (InterruptedException e) {
-					ConnectStatusGui.accept("Disconnected");
-					Thread.currentThread().interrupt(); // Restore interrupt status
-					if (currentVpnProcess != null && currentVpnProcess.isAlive()) {
-						currentVpnProcess.destroyForcibly();
+					if (line.contains("SIGUSR1[soft,ping-restart] received, process restarting")) {
+						ConnectStatusGui.accept("Connection restarting...");
+						restartRequested[0] = true;
+						break;
 					}
-					break; // Exit outer loop on interrupt
-
-				} catch (IOException e) {
-					ConnectStatusGui.accept("Error reading OpenVPN output: " + e.getMessage());
-					break; // Exit on IO error
 				}
-
-				// Wait for process to exit and check exit code
-				try {
-					int exitCode = currentVpnProcess.waitFor();
-					ConnectStatusGui.accept("VPN connection ended with exit code: " + exitCode);
-				} catch (InterruptedException e) {
-					ConnectButtonGui.accept("Connect");
-					disconnectVpn(ConnectStatusGui);
-					ConnectStatusGui.accept("Disconnected");
-					Thread.currentThread().interrupt();
-					break;
-				}
-
 			} catch (IOException e) {
-				ConnectStatusGui.accept("Error starting OpenVPN: " + e.getMessage());
-				break; // Exit on process start failure
-			} finally {
-				currentVpnProcess = null; // Reset process reference
+				ConnectStatusGui.accept("Error reading OpenVPN output: " + e.getMessage());
+			}
+		});
+
+		readerThread.start();
+
+		// Watchdog loop
+		while (!connected[0] && !restartRequested[0] &&
+				System.currentTimeMillis() - startTime < timeoutMs) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				break;
 			}
 		}
+
+		// Timeout or restart
+		if (!connected[0]) {
+			if (restartRequested[0]) {
+				ConnectStatusGui.accept("Restarting...");
+				if (vpnProcess.isAlive()) {
+					vpnProcess.destroyForcibly();
+					vpnProcess.waitFor();
+				}
+				// Optionally: implement recursive retry or call connectVpn again
+			} else {
+				System.out.println("Timeout reached, VPN not connected.");
+				ConnectStatusGui.accept("Deleted");
+				guiController.MediaPlayerTest(false);
+
+				VPNConfigDAO.DeleteUnresponsiveOvpn(ovpnPath);
+				VPNConfigDAO.refreshAndGenerateEncodedCountries();
+				VPNManager.disconnectVpn();
+
+				if (vpnProcess.isAlive()) {
+					vpnProcess.destroyForcibly();
+					vpnProcess.waitFor();
+				}
+
+				Platform.runLater(() -> {
+					guiController.RefreshMain();
+					guiController.RefreshVpns();
+					guiController.Refresh2();
+				});
+			}
+		}
+
+		readerThread.interrupt();
+		currentVpnProcess = null;
 	}
 
 	public static void disconnectVpn() {
@@ -292,6 +400,7 @@ public class VPNManager {
 		}
 		if (!recheckCancelStatus) {
 			ConnectStatusGui.accept("Recheck completed");
+			guiController.MediaPlayerTest(false);
 			RecheckButtonGui.accept("Recheck");
 		} else {
 			ConnectStatusGui.accept("Canceled");

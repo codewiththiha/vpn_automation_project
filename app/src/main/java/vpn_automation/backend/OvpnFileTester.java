@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import vpn_automation.backend.db.VPNConfigDAO;
 import vpn_automation.backend.db.WifiProfileDAO;
 import vpn_automation.gui.control.MainGuiController;
+import vpn_automation.gui.control.StartupOnlyProgressingGui;
 
 public class OvpnFileTester {
 	private final static int TIMEOUT_SECONDS = 20;
@@ -79,8 +80,68 @@ public class OvpnFileTester {
 	}
 
 	public List<String> testOvpnFiles(String directory, Consumer<String> guiUpdater, int Limit,
+			StartupOnlyProgressingGui updateGui)
+			throws SQLException, Exception {
+		guiUpdater.accept("Starting OVPN file testing...");
+		guiUpdater.accept("Scanning directory: " + directory);
+
+		List<String> workingFiles = new ArrayList<>();
+
+		try {
+			List<Path> ovpnFiles = FileUtils.getOvpnFiles(directory);
+			if (ovpnFiles.isEmpty()) {
+				guiUpdater.accept("No .ovpn files found in the current directory");
+				return workingFiles;
+			}
+
+			for (Path file : ovpnFiles) {
+				int SearchStatus = WifiProfileDAO.GetSearchStatus();
+				try {
+					if (workingFiles.size() == Limit || (SearchStatus == 0)) { // you can specify
+																				// here for the user
+						// limit
+						System.out.println("Stopped");
+						break;
+					}
+					if (FileUtils.isChecked(file.toString())) {
+						guiUpdater.accept("Skipping already checked file: " + file.getFileName());
+						continue;
+					}
+
+					guiUpdater.accept(
+							"Testing: " + file.getFileName() + "\n" + workingFiles.size() + " vpn configs found.");
+
+					if (testOvpnFile(file, guiUpdater)) {
+						workingFiles.add(file.toString());
+						guiUpdater.accept("Success: " + file.getFileName() + " connected successfully");
+						updateGui.continue_button.setVisible(true);
+					} else {
+						guiUpdater.accept("Failed: " + file.getFileName());
+					}
+				} catch (IOException e) {
+					guiUpdater.accept("Error processing " + file.getFileName() + ": " + e.getMessage());
+				}
+				System.out.println("--------------------------------------------------");
+			}
+
+			if (!workingFiles.isEmpty()) {
+				saveWorkingFiles(workingFiles, guiUpdater);
+				guiUpdater.accept("Found " + workingFiles.size() + " working OVPN files");
+			} else {
+				guiUpdater.accept("No working OVPN files found");
+			}
+		} catch (IOException e) {
+			guiUpdater.accept("Error scanning directory: " + e.getMessage());
+		}
+
+		guiUpdater.accept("Testing complete");
+		return workingFiles;
+	}
+
+	public List<String> testOvpnFiles(String directory, Consumer<String> guiUpdater, int Limit,
 			MainGuiController guiController)
 			throws SQLException, Exception {
+		System.out.println("First type search process");
 		guiUpdater.accept("Starting OVPN file testing...");
 		guiUpdater.accept("Scanning directory: " + directory);
 
@@ -115,8 +176,10 @@ public class OvpnFileTester {
 						guiUpdater.accept("Success: " + file.getFileName() + " connected successfully");
 						guiController.RefreshMain();
 						guiController.RefreshVpns();
+
 					} else {
 						guiUpdater.accept("Failed: " + file.getFileName());
+
 					}
 				} catch (IOException e) {
 					guiUpdater.accept("Error processing " + file.getFileName() + ": " + e.getMessage());
@@ -175,6 +238,8 @@ public class OvpnFileTester {
 				if (System.currentTimeMillis() - startTime >= TIMEOUT_SECONDS * 1000) {
 					guiUpdater.accept(
 							"Timeout: " + file.getFileName() + " failed within " + TIMEOUT_SECONDS + " seconds");
+
+					System.out.println("Time out");
 					return false;
 				}
 

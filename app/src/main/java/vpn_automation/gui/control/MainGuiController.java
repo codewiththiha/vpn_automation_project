@@ -1,11 +1,12 @@
 package vpn_automation.gui.control;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
-
+import javafx.stage.DirectoryChooser;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -35,6 +36,12 @@ public class MainGuiController {
 	private Label active_wifi_profile_label;
 
 	@FXML
+	private Button ovpn_path_button;
+
+	@FXML
+	private Button save_path_button;
+
+	@FXML
 	private Button change_password_button;
 
 	@FXML
@@ -57,6 +64,9 @@ public class MainGuiController {
 
 	@FXML
 	private Button log_out_button;
+
+	@FXML
+	private Button export_button;
 
 	@FXML
 	private Label logged_in_user_label;
@@ -92,12 +102,10 @@ public class MainGuiController {
 		RefreshVpns();
 		logged_in_user_label.setText(UserDAO.getActiveUserName());
 
-		String currentDir = "/home/thiha/Developer/vpn_automation/app/src/main/resources/ovpn_files";
-
 		MediaPlayerTest(false);
 		OvpnFileTester.fixUnknownOvpns();
 		try {
-			raw_ovpn_slider.setMax((double) FileUtils.getOvpnFiles(currentDir).size());
+			raw_ovpn_slider.setMax((double) FileUtils.getOvpnFiles(UserDAO.getOvpnPath()).size());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -134,9 +142,58 @@ public class MainGuiController {
 			dialog.show();
 		});
 
+		export_button.setOnAction(e -> {
+			Platform.runLater(() -> {
+				ExportUIController exportGui = new ExportUIController();
+				exportGui.show();
+			});
+		});
+
 		change_password_button.setOnAction(event -> {
 			ChangePassword dialog = new ChangePassword();
 			dialog.show();
+		});
+
+		ovpn_path_button.setOnAction(event -> {
+			Platform.runLater(() -> {
+				Stage currentStage = (Stage) ovpn_path_button.getScene().getWindow();
+				DirectoryChooser dirChooser = new DirectoryChooser();
+				File selectedDir = dirChooser.showDialog(currentStage);
+
+				try {
+					if ((selectedDir != null) && (FileUtils.getOvpnFiles(selectedDir.getAbsolutePath()).size() != 0)) {
+						String path = selectedDir.getAbsolutePath();
+						System.out.println("Directory Path: " + path);
+						UserDAO.changeOvpnPath(path);
+						try {
+							raw_ovpn_slider.setMax((double) FileUtils.getOvpnFiles(UserDAO.getOvpnPath()).size());
+						} catch (SQLException e1) {
+
+							e1.printStackTrace();
+						}
+					} else {
+						ErrorDialog dialog = new ErrorDialog();
+						dialog.setErrorMessage("OVPN files not found!");
+						dialog.show();
+						System.out.println("NoOVPN found!");
+					}
+				} catch (IOException e) {
+
+					e.printStackTrace();
+				}
+			});
+		});
+
+		save_path_button.setOnAction(e -> {
+			Platform.runLater(() -> {
+				Stage currentStage = (Stage) ovpn_path_button.getScene().getWindow();
+				DirectoryChooser dirChooser = new DirectoryChooser();
+				File selectedDir = dirChooser.showDialog(currentStage);
+				if (selectedDir != null) {
+					String path = selectedDir.getAbsolutePath();
+					UserDAO.changeSavePath(path);
+				}
+			});
 		});
 
 		log_out_button.setOnAction(event -> {
@@ -159,34 +216,41 @@ public class MainGuiController {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+
 					System.out.println("Vpn disconnected");
 				}
 			}
 
-			System.out.println("No VPN connections in current usage");
+			else {
+				System.out.println("No VPN connections in current usage");
+				warning_dialog.setWarning("Press Continue to LogOut", "Continue");
+				if (!warning_dialog.showAndGetResult()) {
+					return;
+				} else {
+					if (WifiProfileDAO.GetSearchStatus() == 1) {
+						WifiProfileDAO.ResetSearchStatus();
+						System.out.println("Stopped search");
 
-			if (WifiProfileDAO.GetSearchStatus() == 1) {
-				WifiProfileDAO.ResetSearchStatus();
-				System.out.println("Stopped search");
+						MediaPlayerTest(false);
+						if (backgroundTask != null && backgroundTask.isRunning()) {
+							backgroundTask.cancel();
+						}
+						search_ovpn_button.setText("Search");
 
-				MediaPlayerTest(false);
-				if (backgroundTask != null && backgroundTask.isRunning()) {
-					backgroundTask.cancel();
+					}
+
+					Stage currentStage = (Stage) log_out_button.getScene().getWindow();
+					try {
+						WifiProfileDAO.resetActiveProfile();
+						UserDAO.logoutUser();
+
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					NavigationUtils.navigateTo(currentStage, "/fxml_files/login_or_register.fxml");
 				}
-				search_ovpn_button.setText("Search");
-
 			}
-
-			Stage currentStage = (Stage) log_out_button.getScene().getWindow();
-			try {
-				WifiProfileDAO.resetActiveProfile();
-				UserDAO.logoutUser();
-
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			NavigationUtils.navigateTo(currentStage, "/fxml_files/login_or_register.fxml");
 		});
 
 		recheck_button.setOnAction(event -> {
@@ -290,6 +354,8 @@ public class MainGuiController {
 				if (backgroundTask != null && backgroundTask.isRunning()) {
 					VPNManager.disconnectVpn(this::UpdateConnectStatus);
 					VPNConfigDAO.SetVpnDisconnect();
+					MediaPlayerTest(false);
+					UpdateConnectStatus("Canceled");
 					backgroundTask.cancel();
 					return;
 				}
@@ -374,7 +440,7 @@ public class MainGuiController {
 				backgroundTask = new Task<>() {
 					@Override
 					protected Void call() throws Exception {
-						SearchOvpn(currentDir, limit);
+						SearchOvpn(UserDAO.getOvpnPath(), limit);
 						return null;
 					}
 				};
@@ -428,20 +494,30 @@ public class MainGuiController {
 		List<String> vpnCountries = VPNConfigDAO.getEncodedCountries(activeWifiProfileId);
 		// todo navigate to tab2
 		System.out.println(vpnCountries.isEmpty());
-		if (!vpnCountries.isEmpty()) {
-			Platform.runLater(() -> {
-				config_combo_box.setValue(vpnCountries.getFirst());
-				Collections.sort(vpnCountries);
-				ObservableList<String> observableVpnCountries = FXCollections.observableArrayList(vpnCountries);
-				config_combo_box.setItems(observableVpnCountries);
-				if (firstTime) {
-					System.out.println("Here");
-					config_combo_box.setValue(vpnCountries.getFirst());
-					firstTime = false;
-				}
 
-			});
-		} else {
+		try {
+			if (!vpnCountries.isEmpty()) {
+				Platform.runLater(() -> {
+					Collections.sort(vpnCountries);
+					ObservableList<String> observableVpnCountries = FXCollections.observableArrayList(vpnCountries);
+					config_combo_box.setItems(observableVpnCountries);
+					String firstCountry = vpnCountries.getFirst();
+					System.out.println(firstCountry);
+					config_combo_box.setValue(firstCountry);
+
+					if (firstTime) {
+						System.out.println("Here");
+						config_combo_box.setValue(vpnCountries.getFirst());
+						firstTime = false;
+					}
+
+				});
+			}
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+			RefreshMain();
+		}
+		if (vpnCountries.isEmpty()) {
 			vpnCountries.add("Empty");
 			ObservableList<String> observableVpnCountries = FXCollections.observableArrayList(vpnCountries);
 			System.out.println("RefreshVPns occurs error");
@@ -456,7 +532,7 @@ public class MainGuiController {
 		VPNConfigDAO.refreshAndGenerateEncodedCountries();
 	}
 
-	public void VPNConnect() throws IOException {
+	public void VPNConnect() throws IOException, InterruptedException {
 		// VPNManager.disconnectVpn(this::UpdateConnectStatus);
 		// VPNConfigDAO.SetVpnDisconnect();
 		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();

@@ -347,4 +347,23 @@ public class WifiProfileDAO {
 		}
 	}
 
+	public static String getActiveWifiBrandName() {
+		String query = "SELECT wifi_brand from wifiprofile WHERE active_profile = 1";
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query);
+				ResultSet rs = pstmt.executeQuery()) {
+
+			if (rs.next()) {
+				// Return the first active wifiProfileID found
+				return rs.getString("wifi_brand");
+			} else {
+				return "WifiBrand";
+			}
+		} catch (SQLException e) {
+			System.err.println("Error retrieving wifiProfileID:");
+			e.printStackTrace();
+			return "WifiProfile";
+		}
+	}
+
 }

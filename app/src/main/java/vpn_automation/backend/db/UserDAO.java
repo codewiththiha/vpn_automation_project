@@ -214,4 +214,84 @@ public class UserDAO {
 		}
 	}
 
+	public static String getOvpnPath() throws SQLException {
+		String selectQuery = "SELECT ovpn_path FROM user WHERE login_or_logout = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(selectQuery);
+				ResultSet rs = pstmt.executeQuery()) {
+
+			if (rs.next()) {
+				// Return the first active user ID found
+				return rs.getString("ovpn_path");
+			} else {
+				// No active user found for case -1 - i need to check whether sql int support
+				// negative values!
+				return null;
+			}
+		} catch (SQLException e) {
+			System.err.println("Error retrieving ovpn-path");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static void changeOvpnPath(String path) {
+		String query = "UPDATE user SET ovpn_path = ? WHERE login_or_logout = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+			pstmt.setString(1, path);
+			int rowsUpdated = pstmt.executeUpdate();
+			if (rowsUpdated > 0) {
+				System.out.println("Change Succeeded");
+			} else {
+				System.out.println("Change Failed");
+			}
+		} catch (SQLException e) {
+			System.err.println("Error updating password");
+			e.printStackTrace();
+		}
+	}
+
+	public static void changeSavePath(String path) {
+		String query = "UPDATE user SET export_path = ? WHERE login_or_logout = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+			pstmt.setString(1, path);
+			int rowsUpdated = pstmt.executeUpdate();
+			if (rowsUpdated > 0) {
+				System.out.println("Change Succeeded");
+			} else {
+				System.out.println("Change Failed");
+			}
+		} catch (SQLException e) {
+			System.err.println("Error updating export-path");
+			e.printStackTrace();
+		}
+	}
+
+	public static String getExportPath() throws SQLException {
+		String selectQuery = "SELECT export_path FROM user WHERE login_or_logout = 1";
+
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(selectQuery);
+				ResultSet rs = pstmt.executeQuery()) {
+
+			if (rs.next()) {
+				// Return the first active user ID found
+				return rs.getString("export_path");
+			} else {
+				// No active user found for case -1 - i need to check whether sql int support
+				// negative values!
+				return null;
+			}
+		} catch (SQLException e) {
+			System.err.println("Error retrieving export-path");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 }

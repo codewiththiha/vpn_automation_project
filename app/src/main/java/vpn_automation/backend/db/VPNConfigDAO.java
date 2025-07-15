@@ -476,4 +476,29 @@ public class VPNConfigDAO {
 		// TODO
 	}
 
+	public static String GetEncodedCountriesByPath(String ovpn) {
+		String query = "SELECT encoded_names FROM vpnconfig WHERE wifi_profile_id = ? AND ovpn_file_path = ?";
+		int activeWifiProfileId = WifiProfileDAO.getActiveWifiProfileId();
+		try (Connection conn = DBConnection.getConnection();
+				PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setInt(1, activeWifiProfileId);
+			pstmt.setString(2, ovpn);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+
+					return rs.getString("encoded_names");
+				} else {
+
+					return null;
+				}
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Error retrieving encodename");
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 }

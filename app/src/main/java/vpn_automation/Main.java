@@ -28,7 +28,7 @@ public class Main extends Application {
 			List<Integer> wifiProfileIds = WifiProfileDAO.getWifiProfileIds(activeUserId);
 			if (wifiProfileIds != null && !wifiProfileIds.isEmpty()) {
 				int wifiProfileId = wifiProfileIds.getFirst();
-
+				System.out.println("Here is the id:" + VPNConfigDAO.giveWifiProfileIdGetvpnConfigIds(wifiProfileId));
 				if (VPNConfigDAO.giveWifiProfileIdGetvpnConfigIds(wifiProfileId).isEmpty()) {
 					loader = new FXMLLoader(getClass().getResource("/fxml_files/progressing_startup.fxml"));
 				} else {

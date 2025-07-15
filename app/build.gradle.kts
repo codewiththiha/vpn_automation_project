@@ -89,6 +89,14 @@ tasks.register<JavaExec>("TestDB") {
     dependsOn(tasks.classes)
 }
 
+tasks.register<JavaExec>("TestSele") {
+    group = "application"
+    description = "Test Database Connection"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("vpn_automation.backend.SeleniumTest")
+    dependsOn(tasks.classes)
+}
+
 // Task to create a custom runtime image with jlink
 tasks.register<Exec>("createRuntimeImage") {
     group = "distribution"
