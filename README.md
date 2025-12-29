@@ -3,6 +3,10 @@
 *Automate the discovery, testing and management of OpenVPN configurations with a friendly Java‑FX UI.*  
 
 ---  
+> **⚠️ Project Deprecation Notice**
+> This project has been superseded and replaced by a significantly improved version utilizing better technology stacks. Please visit the new repository here: **[https://github.com/codewiththiha/vmate-cli.git](https://github.com/codewiththiha/vmate-cli.git)**
+---
+
 
 ## Table of Contents  
 
